@@ -203,7 +203,7 @@ for (file_name in nighttime_volcano_files) {
   plot(aster_b10_latlon, col = grey(1:1000/1000), colNA="black")
   # Adding metadata cloud coverage by quadrant
   title(paste0(md[grep('QUADRANTCLOUDCOVER', md)]), '\nUpperLeft, UpperRight, LowerLeft, LowerRight')
-  # Masaya
+  # Volcano
   points(coord_x, coord_y, cex = 3, col = 'red')
   
   # Zoomed-in plot
@@ -213,7 +213,7 @@ for (file_name in nighttime_volcano_files) {
                    coord_y - 0.1,
                    coord_y + 0.1)),
        col = grey(1:1000/1000), colNA="black")
-  # Masaya
+  # Volcano
   points(coord_x, coord_y, cex = 3, col = 'red')
   
   # Record quality evaluation

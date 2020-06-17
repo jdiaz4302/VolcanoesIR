@@ -17,8 +17,8 @@
 # Requirements / parameters
 # 1. You need to be in the directory (i.e. data/volcano_name) with the .hdf files of interest
 #     i.  These files should all pertain to 1 volcano
-coord_x = coord_1 # lon
-coord_y = coord_2 # lat
+coord_x =  # lon
+coord_y =  # lat
 out_dir <- 'processed/'
 par(mfrow = c(1, 2))
 
@@ -57,7 +57,11 @@ acquisition_times <- strptime(acquisition_times, tz = 'GMT', format = '%H%M%S')
 # Determine the frequency of nighttime imagery
 acquisition_times_calc <- as.numeric(acquisition_times)
 midpoint <- min(acquisition_times_calc) + 1/2*(max(acquisition_times_calc) - min(acquisition_times_calc))
-nighttime_indicators <- as.numeric(acquisition_times) < midpoint
+if (coord_y > 0) {
+  nighttime_indicators <- as.numeric(acquisition_times) > midpoint
+} else {
+  nighttime_indicators <- as.numeric(acquisition_times) < midpoint
+}
 sum(nighttime_indicators) / length(nighttime_indicators)
 
 # Limit data to nighttime

@@ -17,8 +17,8 @@
 # Requirements / parameters
 # 1. You need to be in the directory (i.e. data/volcano_name) with the .hdf files of interest
 #     i.  These files should all pertain to 1 volcano
-coord_x = 40.662474 # lon
-coord_y = 13.604800 # lat
+coord_x =  # lon
+coord_y =  # lat
 out_dir <- 'processed/'
 par(mfrow = c(1, 2))
 

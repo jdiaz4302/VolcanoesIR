@@ -22,9 +22,11 @@ quality_df <- read.csv('quality_df.csv')
 library(raster)
 library(fractal)
 
-name =
-coord_x =  # lon
-coord_y =  # lat
+# Input parameters
+inspection_index = # used for determining volcano extent and background extent
+name = # used for Plots
+coord_x = # lon
+coord_y = # lat
 
 # Remove data entry inconsistencies (lower versus upper case)
 quality_df$quality <- tolower(quality_df$quality)
@@ -44,7 +46,7 @@ good_df$dates <- strptime(dates, format = '%m%d%Y')
 good_df <- good_df[order(good_df$dates), ]
 
 # Read in 1 file, obtain a cropped extent and derive size of extent
-t <- good_df$nighttime_volcano_files[45]
+t <- good_df$nighttime_volcano_files[inspection_index] 
 t <- raster(t)
 t <- projectRaster(t,
                    crs = CRS("+proj=longlat +datum=WGS84"))

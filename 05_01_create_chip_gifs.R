@@ -34,8 +34,7 @@ for (chip in chip_files) {
 
 for (i in 1:length(chip_files)) {
   png(paste0("../../temp_gif_image_holder/",
-             sprintf("%04d", i), ".png"),
-      units = 'in', height = 8, width = 8, res = 300)
+             sprintf("%04d", i), ".png"))
   date = substr(strsplit(chip_files[i], '_')[[1]][3], start = 4, stop = 11)
   image(image_cube_series[i, 3, ,], col = grey(1:10000/10000),
         xaxt = 'n', yaxt = 'n',

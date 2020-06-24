@@ -26,7 +26,7 @@ for (chip in chip_files) {
                      pattern = 'ImageData12',
                      replacement = paste0("ImageData",
                                           as.character(band)))
-    data <- as.matrix(read.table(chip, as.is = TRUE))
+    data <- as.matrix(read.table(band_chip, as.is = TRUE))
     image_cube_series[count, band-9, ,] <- data
   }
   count <- count + 1

@@ -53,7 +53,7 @@ class ConvTime_LSTM2Cell(nn.Module):
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
                                    bias=self.bias)
-        self.T1_conv_t = nn.Conv2d(in_channels=1,
+        self.T1_conv_t = nn.Conv2d(in_channels=self.input_dim,
                                    out_channels=self.hidden_dim,
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
@@ -65,7 +65,7 @@ class ConvTime_LSTM2Cell(nn.Module):
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
                                    bias=self.bias)
-        self.T2_conv_t = nn.Conv2d(in_channels=1,
+        self.T2_conv_t = nn.Conv2d(in_channels=self.input_dim,
                                    out_channels=self.hidden_dim,
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
@@ -79,7 +79,7 @@ class ConvTime_LSTM2Cell(nn.Module):
                                 bias=self.bias)
         
         ## Defining the output convolutional layer ##
-        self.o_conv = nn.Conv2d(in_channels=self.input_dim + self.hidden_dim + 1,
+        self.o_conv = nn.Conv2d(in_channels=self.input_dim + self.hidden_dim + self.input_dim,
                                 out_channels=self.hidden_dim,
                                 kernel_size=self.kernel_size,
                                 padding=self.padding,

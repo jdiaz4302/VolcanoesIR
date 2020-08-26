@@ -26,6 +26,7 @@ out_samp_perc = 0.15 # validation and testing
 
 
 # Basic data import
+print("Importing and formatting data")
 volcanoes = os.listdir("data")
 
 try:
@@ -130,34 +131,36 @@ for vol in volcanoes:
 
 
 # Scale 0-1, replace NAs with scaled 0s
-x_scenes_train = scale_and_remove_na(x_scenes_train)
-x_scenes_train = scale_and_remove_na(x_scenes_train)
-x_scenes_train = scale_and_remove_na(x_scenes_train)
-time_differences_train = scale_and_remove_na(time_differences_train)
-time_differences_train = scale_and_remove_na(time_differences_train)
-time_differences_train = scale_and_remove_na(time_differences_train)
-y_scenes_train = scale_and_remove_na(y_scenes_train)
-y_scenes_train = scale_and_remove_na(y_scenes_train)
-y_scenes_train = scale_and_remove_na(y_scenes_train)
+print("Processing data")
+x_train = scale_and_remove_na(x_train)
+x_valid = scale_and_remove_na(x_valid)
+x_test = scale_and_remove_na(x_test)
+t_train = scale_and_remove_na(t_train)
+t_valid = scale_and_remove_na(t_valid)
+t_test = scale_and_remove_na(t_test)
+y_train = scale_and_remove_na(y_train)
+y_valid = scale_and_remove_na(y_valid)
+y_test = scale_and_remove_na(y_test)
 
 
 # Convert to torch tensors
-x_scenes_train = torch.from_numpy(x_scenes_train).type(torch.FloatTensor)
-x_scenes_test = torch.from_numpy(x_scenes_test).type(torch.FloatTensor)
-x_scenes_valid = torch.from_numpy(x_scenes_valid).type(torch.FloatTensor)
-time_differences_train = torch.from_numpy(time_differences_train).type(torch.FloatTensor)
-time_differences_test = torch.from_numpy(time_differences_test).type(torch.FloatTensor)
-time_differences_valid = torch.from_numpy(time_differences_valid).type(torch.FloatTensor)
-y_scenes_train = torch.from_numpy(y_scenes_train).type(torch.FloatTensor)
-y_scenes_test = torch.from_numpy(y_scenes_test).type(torch.FloatTensor)
-y_scenes_valid = torch.from_numpy(y_scenes_valid).type(torch.FloatTensor)
+x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
+x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
+x_valid = torch.from_numpy(x_valid).type(torch.FloatTensor)
+t_train = torch.from_numpy(t_train).type(torch.FloatTensor)
+t_test = torch.from_numpy(t_test).type(torch.FloatTensor)
+t_valid = torch.from_numpy(t_valid).type(torch.FloatTensor)
+y_train = torch.from_numpy(y_train).type(torch.FloatTensor)
+y_test = torch.from_numpy(y_test).type(torch.FloatTensor)
+y_valid = torch.from_numpy(y_valid).type(torch.FloatTensor)
 
 
 # Defining model parameters
 # Picking one of the like-sequence tensors within the list to set parameters
-channels = x_scenes_train.shape[2]
-height = x_scenes_train.shape[3]
-width = x_scenes_train.shape[4]
+print("Beginning training")
+channels = x_train.shape[2]
+height = x_train.shape[3]
+width = x_train.shape[4]
 conv_time_lstm = ConvTime_LSTM2(input_size = (height, width), input_dim = channels, hidden_dim = [128, 64, 64, 1], kernel_size = (5, 5), num_layers = 4, batch_first = True, bias = True, return_all_layers = False, GPU = True)
 
 
@@ -184,9 +187,9 @@ class train_Dataset(data.Dataset):
 		# Select sample
 		IDs = self.data_indices[index]
 		# Load data and get label
-		curr_x = x_scenes_train[IDs, :, :, :, :]
-		curr_t = time_differences_train[IDs, :, :, :, :]
-		curr_y = y_scenes_train[IDs, :, :, :, :]
+		curr_x = x_train[IDs, :, :, :, :]
+		curr_t = t_train[IDs, :, :, :, :]
+		curr_y = y_train[IDs, :, :, :, :]
 		#return X, y
 		return(curr_x, curr_t, curr_y)
 class validation_Dataset(data.Dataset):
@@ -202,13 +205,13 @@ class validation_Dataset(data.Dataset):
 		# Select sample
 		IDs = self.data_indices[index]
 		# Load data and get label
-		curr_x = x_scenes_valid[IDs, :, :, :, :]
-		curr_t = time_differences_valid[IDs, :, :, :, :]
-		curr_y = y_scenes_valid[IDs, :, :, :, :]
+		curr_x = x_valid[IDs, :, :, :, :]
+		curr_t = t_valid[IDs, :, :, :, :]
+		curr_y = y_valid[IDs, :, :, :, :]
 		#return X, y
 		return(curr_x, curr_t, curr_y)
-training_set = train_Dataset(data_indices=range(y_scenes_train.shape[0]))
-validation_set = validation_Dataset(data_indices=range(y_scenes_valid.shape[0]))
+training_set = train_Dataset(data_indices=range(y_train.shape[0]))
+validation_set = validation_Dataset(data_indices=range(y_valid.shape[0]))
 train_loader = torch.utils.data.DataLoader(dataset = training_set, batch_size = batch_size, shuffle = True)
 validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_size = batch_size, shuffle = True)
 
@@ -219,8 +222,9 @@ conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
 
 
 # Training loop
+print("Beginning training")
 loss_list = []
-epochs = int(np.ceil((7*10**5) / x_scenes_train.shape[0]))
+epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
 for i in range(epochs):
 	for data in train_loader:
 		

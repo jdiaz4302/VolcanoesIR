@@ -2,6 +2,20 @@
 
 
 
+# Parameter setting that is unique to this data
+# The data is 5 thermal (ASTER) bands
+x_and_t_channels_fragile = 5
+# This cannot rely on the self.input_dim parameter
+# because that constantly updates while this should not
+# because it is for the inputs to the T1/T2 gate computations
+# Which rely exclusively on the original data, not
+# hidden values, although they will influence hidden values
+
+# This is also relevant for the differences between:
+#   (1) input_tensor_for_h
+#   (2) input_tensor_for_x
+# Where (1) is x as it has been projected into higher dimen.
+# hidden space and (2) is x in its original state
 
 import torch
 from torch.autograd import Variable
@@ -48,24 +62,24 @@ class ConvTime_LSTM2Cell(nn.Module):
                                 bias=self.bias)
         
         ## Defining the T2 convolutional layer ##
-        self.T1_conv_x = nn.Conv2d(in_channels=self.input_dim,
+        self.T1_conv_x = nn.Conv2d(in_channels=x_and_t_channels_fragile,
                                    out_channels=self.hidden_dim,
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
                                    bias=self.bias)
-        self.T1_conv_t = nn.Conv2d(in_channels=self.input_dim,
+        self.T1_conv_t = nn.Conv2d(in_channels=x_and_t_channels_fragile,
                                    out_channels=self.hidden_dim,
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
                                    bias=self.bias)
         
         ## Defining the T1 convolutional layer ##
-        self.T2_conv_x = nn.Conv2d(in_channels=self.input_dim,
+        self.T2_conv_x = nn.Conv2d(in_channels=x_and_t_channels_fragile,
                                    out_channels=self.hidden_dim,
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
                                    bias=self.bias)
-        self.T2_conv_t = nn.Conv2d(in_channels=self.input_dim,
+        self.T2_conv_t = nn.Conv2d(in_channels=x_and_t_channels_fragile,
                                    out_channels=self.hidden_dim,
                                    kernel_size=self.kernel_size,
                                    padding=self.padding,
@@ -79,23 +93,20 @@ class ConvTime_LSTM2Cell(nn.Module):
                                 bias=self.bias)
         
         ## Defining the output convolutional layer ##
-        self.o_conv = nn.Conv2d(in_channels=self.input_dim + self.hidden_dim + self.input_dim,
+        self.o_conv = nn.Conv2d(in_channels=self.input_dim + self.hidden_dim + x_and_t_channels_fragile,
                                 out_channels=self.hidden_dim,
                                 kernel_size=self.kernel_size,
                                 padding=self.padding,
                                 bias=self.bias)
 
-    def forward(self, input_tensor, time_tensor, cur_state):
-        
-        
+    def forward(self, input_tensor_for_h, input_tensor_for_x, time_tensor, cur_state): 
         ## Getting the h_{m-1} and c_{m-1} ##
         ##     the previous hidden and activations ##
         h_cur, c_cur = cur_state
 
-
         ## concatenate the prev. hidden state and the current input along the color channel dim ##
-        x_h_combined = torch.cat([input_tensor, h_cur], dim = 1)
-        x_h_t_combined = torch.cat([input_tensor, h_cur, time_tensor], dim = 1)
+        x_h_combined = torch.cat([input_tensor_for_h, h_cur], dim = 1)
+        x_h_t_combined = torch.cat([input_tensor_for_h, h_cur, time_tensor], dim = 1)
         
         
         ## The input gate ##
@@ -107,7 +118,7 @@ class ConvTime_LSTM2Cell(nn.Module):
         
         ## The first time gate ##
         ## Running the first time convolution for x ##
-        T1_x_conv_output = self.T1_conv_x(input_tensor)
+        T1_x_conv_output = self.T1_conv_x(input_tensor_for_x)
         ## Running the first time convolution for t ##
         ## Ensuring that the theoretical constraint of non-positive is met ##
         self.T1_conv_t.weight = torch.nn.Parameter(self.T1_conv_t.weight.clamp(max = 0))
@@ -123,7 +134,7 @@ class ConvTime_LSTM2Cell(nn.Module):
         
         ## The second time gate ##
         ## Running the second time convolution for x ##
-        T2_x_conv_output = self.T2_conv_x(input_tensor)
+        T2_x_conv_output = self.T2_conv_x(input_tensor_for_x)
         ## Running the first time convolution for t ##
         ## Passing the convolution ##
         T2_t_conv_output = self.T2_conv_t(time_tensor)
@@ -204,7 +215,7 @@ class ConvTime_LSTM2(nn.Module):
 
         self.cell_list = nn.ModuleList(cell_list)
 
-    def forward(self, input_tensor, time_tensor, hidden_state=None):
+    def forward(self, input_tensor_for_h, input_tensor_for_x, time_tensor, hidden_state=None):
         """
         
         Parameters
@@ -227,13 +238,14 @@ class ConvTime_LSTM2(nn.Module):
         if hidden_state is not None:
             raise NotImplementedError()
         else:
-            hidden_state = self._init_hidden(batch_size=input_tensor.size(0))
+            hidden_state = self._init_hidden(batch_size=input_tensor_for_h.size(0))
 
         layer_output_list = []
         last_state_list   = []
 
-        seq_len = input_tensor.size(1)
-        cur_layer_input = input_tensor
+        seq_len = input_tensor_for_h.size(1)
+        cur_layer_input_for_h = input_tensor_for_h
+        cur_layer_input_for_x = input_tensor_for_x
         cur_time_input = time_tensor
 
         for layer_idx in range(self.num_layers):
@@ -241,13 +253,15 @@ class ConvTime_LSTM2(nn.Module):
             output_inner = []
             for t in range(seq_len):
 
-                h, c = self.cell_list[layer_idx](input_tensor = cur_layer_input[:, t, :, :, :],
+                h, c = self.cell_list[layer_idx](input_tensor_for_h = cur_layer_input_for_h[:, t, :, :, :],
+                                                input_tensor_for_x = cur_layer_input_for_x[:, t, :, :, :],
                                                  time_tensor = cur_time_input[:, t, :, :, :],
                                                  cur_state=[h, c])
                 output_inner.append(h)
 
             layer_output = torch.stack(output_inner, dim=1)
-            cur_layer_input = layer_output
+            # At the next depth layer, allowing the input to be the prev. layer's output
+            cur_layer_input_for_h = layer_output
 
             layer_output_list.append(layer_output)
             last_state_list.append([h, c])

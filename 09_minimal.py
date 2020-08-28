@@ -203,7 +203,7 @@ for i in range(epochs):
 		batch_y = batch_y.to(device)
 		
 		# run model and get the prediction
-                # one batch_x for hidden transform, one for preserve
+				# one batch_x for hidden transform, one for preserve
 		batch_y_hat = conv_time_lstm(batch_x, batch_x, batch_t)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
@@ -215,5 +215,5 @@ for i in range(epochs):
 		optimizer.zero_grad()
 		batch_loss.backward()
 		optimizer.step()
-                print('update complete!')
+		print('update complete!')
 	print('Epoch: ', i, '\n\tBatch loss: ', batch_loss.item(), '\n')

@@ -13,9 +13,9 @@ class efficient_Dataset(data.Dataset):
 	def __init__(self, data_indices, x, t, y):
 		'Initialization'
 		self.data_indices = data_indices
-                self.x = x
-                self.t = t
-                self.y = y
+		self.x = x
+		self.t = t
+		self.y = y
 	def __len__(self):
 		'Denotes the total number of samples'
 		return len(self.data_indices)
@@ -28,4 +28,4 @@ class efficient_Dataset(data.Dataset):
 		curr_t = t[IDs, :, :, :, :]
 		curr_y = y[IDs, :, :, :, :]
 		#return X, y
-        	return(curr_x, curr_t, curr_y)
+		return(curr_x, curr_t, curr_y)

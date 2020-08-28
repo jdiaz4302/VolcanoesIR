@@ -17,6 +17,7 @@ import torch.nn as nn
 from torch.utils import data
 from models.ConvTimeLSTM2 import ConvTime_LSTM2
 from helper_fns.processing import scale_and_remove_na
+from helper_fns.efcnt_data import train_Dataset, validation_Dataset
 
 
 # Required input
@@ -33,7 +34,7 @@ try:
 	volcanoes.remove(".ipynb_checkpoints")
 except ValueError as e:
 	do = 'nothing'
-	
+
 count = 0
 for vol in volcanoes:
 	### Basic data import ###
@@ -174,42 +175,6 @@ optimizer = torch.optim.Adam(conv_time_lstm.parameters())
 
 
 # Defining data sets and loaders for parallelization option
-class train_Dataset(data.Dataset):
-	'Characterizes a dataset for PyTorch'
-	def __init__(self, data_indices):
-		'Initialization'
-		self.data_indices = data_indices
-	def __len__(self):
-		'Denotes the total number of samples'
-		return len(self.data_indices)
-	def __getitem__(self, index):
-		'Generates one sample of data'
-		# Select sample
-		IDs = self.data_indices[index]
-		# Load data and get label
-		curr_x = x_train[IDs, :, :, :, :]
-		curr_t = t_train[IDs, :, :, :, :]
-		curr_y = y_train[IDs, :, :, :, :]
-		#return X, y
-		return(curr_x, curr_t, curr_y)
-class validation_Dataset(data.Dataset):
-	'Characterizes a dataset for PyTorch'
-	def __init__(self, data_indices):
-		'Initialization'
-		self.data_indices = data_indices
-	def __len__(self):
-		'Denotes the total number of samples'
-		return len(self.data_indices)
-	def __getitem__(self, index):
-		'Generates one sample of data'
-		# Select sample
-		IDs = self.data_indices[index]
-		# Load data and get label
-		curr_x = x_valid[IDs, :, :, :, :]
-		curr_t = t_valid[IDs, :, :, :, :]
-		curr_y = y_valid[IDs, :, :, :, :]
-		#return X, y
-		return(curr_x, curr_t, curr_y)
 training_set = train_Dataset(data_indices=range(y_train.shape[0]))
 validation_set = validation_Dataset(data_indices=range(y_valid.shape[0]))
 train_loader = torch.utils.data.DataLoader(dataset = training_set, batch_size = batch_size, shuffle = True)
@@ -237,8 +202,7 @@ for i in range(epochs):
 		batch_y = batch_y.to(device)
 		
 		# run model and get the prediction
-		batch_y_hat = conv_time_lstm(batch_x,
-									 batch_t)
+		batch_y_hat = conv_time_lstm(batch_x, batch_t)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss

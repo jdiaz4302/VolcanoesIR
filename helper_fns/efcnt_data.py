@@ -24,8 +24,8 @@ class efficient_Dataset(data.Dataset):
 		# Select sample
 		IDs = self.data_indices[index]
 		# Load data and get label
-		curr_x = x[IDs, :, :, :, :]
-		curr_t = t[IDs, :, :, :, :]
-		curr_y = y[IDs, :, :, :, :]
+		curr_x = self.x[IDs, :, :, :, :]
+		curr_t = self.t[IDs, :, :, :, :]
+		curr_y = self.y[IDs, :, :, :, :]
 		#return X, y
 		return(curr_x, curr_t, curr_y)

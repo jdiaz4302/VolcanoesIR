@@ -3,7 +3,7 @@
 
 
 # Training parameters
-batch_size = 16
+batch_size = 8
 
 
 # Libraries and imports
@@ -17,7 +17,7 @@ import torch.nn as nn
 from torch.utils import data
 from models.ConvTimeLSTM2 import ConvTime_LSTM2
 from helper_fns.processing import scale_and_remove_na
-from helper_fns.efcnt_data import train_Dataset, validation_Dataset
+from helper_fns.efcnt_data import efficient_Dataset
 
 
 # Required input
@@ -128,7 +128,7 @@ for vol in volcanoes:
 		t_test = np.append(t_test, time_differences_test, axis = 0)
 		y_test = np.append(y_test, y_scenes_train, axis = 0)
 	count += 1
-	print(x_scenes_train.shape)
+	print('\t\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 
 
 # Scale 0-1, replace NAs with scaled 0s
@@ -158,11 +158,11 @@ y_valid = torch.from_numpy(y_valid).type(torch.FloatTensor)
 
 # Defining model parameters
 # Picking one of the like-sequence tensors within the list to set parameters
-print("Beginning training")
+print("Setting up methods")
 channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
-conv_time_lstm = ConvTime_LSTM2(input_size = (height, width), input_dim = channels, hidden_dim = [128, 64, 64, 1], kernel_size = (5, 5), num_layers = 4, batch_first = True, bias = True, return_all_layers = False, GPU = True)
+conv_time_lstm = ConvTime_LSTM2(input_size = (height, width), input_dim = channels, hidden_dim = [128, 64, 64, 5], kernel_size = (5, 5), num_layers = 4, batch_first = True, bias = True, return_all_layers = False, GPU = True)
 
 
 # Passing to GPU
@@ -175,8 +175,8 @@ optimizer = torch.optim.Adam(conv_time_lstm.parameters())
 
 
 # Defining data sets and loaders for parallelization option
-training_set = train_Dataset(data_indices=range(y_train.shape[0]))
-validation_set = validation_Dataset(data_indices=range(y_valid.shape[0]))
+training_set = efficient_Dataset(data_indices=range(y_train.shape[0]), x = x_train, t=t_train, y = y_train)
+validation_set = efficient_Dataset(data_indices=range(y_valid.shape[0]), x = x_valid, t = t_valid, y = y_valid)
 train_loader = torch.utils.data.DataLoader(dataset = training_set, batch_size = batch_size, shuffle = True)
 validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_size = batch_size, shuffle = True)
 
@@ -189,7 +189,8 @@ conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
 # Training loop
 print("Beginning training")
 loss_list = []
-epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
+#epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
+epochs = 3
 for i in range(epochs):
 	for data in train_loader:
 		
@@ -202,7 +203,8 @@ for i in range(epochs):
 		batch_y = batch_y.to(device)
 		
 		# run model and get the prediction
-		batch_y_hat = conv_time_lstm(batch_x, batch_t)
+                # one batch_x for hidden transform, one for preserve
+		batch_y_hat = conv_time_lstm(batch_x, batch_x, batch_t)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -213,7 +215,5 @@ for i in range(epochs):
 		optimizer.zero_grad()
 		batch_loss.backward()
 		optimizer.step()
-		
-		print('Epoch: ', i, '\n\tBatch loss: ', batch_loss.item(), '\n')
-		
+                print('update complete!')
 	print('Epoch: ', i, '\n\tBatch loss: ', batch_loss.item(), '\n')

@@ -192,10 +192,9 @@ loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
 epochs = 2
 for i in range(epochs):
+	# Marking the beginning time of epoch
+	begin_time = datetime.now()
 	for data in train_loader:
-		
-		# Marking the beginning time
-		begin_time = datetime.now()
 		
 		# data loader
 		batch_x, batch_t, batch_y = data
@@ -219,10 +218,10 @@ for i in range(epochs):
 		batch_loss.backward()
 		optimizer.step()
 		
-		# Marking the end time and computing difference
-		end_time = datetime.now()
-		time_diff = (begin_time - end_time).total_seconds()
-	print('Epoch: ', i, '\n\tBatch loss: ', batch_loss.item(), ' in ' + str(time_diff) + ' seconds')
+	# Marking the end time and computing difference, also printing epoch information
+	end_time = datetime.now()
+	time_diff = (end_time - begin_time).total_seconds()
+	print('Epoch: ', i, '\n\tMost recent batch loss: ', batch_loss.item(), '\n\t' + str(time_diff) + ' seconds elapsed')
 
 
 # Converting loss values into array and saving

@@ -190,9 +190,12 @@ conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 3
+epochs = 2
 for i in range(epochs):
 	for data in train_loader:
+		
+		# Marking the beginning time
+		begin_time = datetime.now()
 		
 		# data loader
 		batch_x, batch_t, batch_y = data
@@ -215,5 +218,22 @@ for i in range(epochs):
 		optimizer.zero_grad()
 		batch_loss.backward()
 		optimizer.step()
-		print('update complete!')
-	print('Epoch: ', i, '\n\tBatch loss: ', batch_loss.item(), '\n')
+		
+		# Marking the end time and computing difference
+		end_time = datetime.now()
+		time_diff = (begin_time - end_time).total_seconds()
+	print('Epoch: ', i, '\n\tBatch loss: ', batch_loss.item(), ' in ' + str(time_diff) + 'seconds')
+
+
+# Converting loss values into array and saving
+loss_array = np.asarray(loss_list)
+np.save('outputs/loss_over_iterations.npy', loss_array)
+
+
+# Generate validation predictions
+for i in range(25):
+	rand_x, rand_y = next(iter(validation_loader))
+	rand_y_hat = conv_time_lstm(rand_x.to(device), torch.ones_like(rand_x).to(device))[0][0][:, -2:-1, :, :, :]
+	rand_y_hat = rand_y_hat.cpu().data.numpy()
+	np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
+

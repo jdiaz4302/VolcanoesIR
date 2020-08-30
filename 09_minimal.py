@@ -233,9 +233,9 @@ np.save('outputs/loss_over_iterations.npy', loss_array)
 # Generate validation predictions
 for i in range(25):
 	rand_x, rand_t, rand_y = next(iter(validation_loader))
-        rand_y = rand_y.cpu().data.numpy()
+	rand_y = rand_y.cpu().data.numpy()
 	rand_y_hat = conv_time_lstm(rand_x.to(device), rand_x.to(device), rand_t.to(device))[0][0][:, -2:-1, :, :, :]
 	rand_y_hat = rand_y_hat.cpu().data.numpy()
 	np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
-        np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)
+	np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)
 

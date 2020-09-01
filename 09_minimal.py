@@ -238,3 +238,7 @@ for i in range(25):
 	np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
 	np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)
 
+
+# Saving the last training batch for reference
+np.save("outputs/train_prediction.npy", batch_y_hat.cpu().data.numpy())
+np.save("outputs/train_truth.npy", batch_y.cpu().data.numpy())

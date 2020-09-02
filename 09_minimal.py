@@ -190,7 +190,7 @@ conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 100
+epochs = 1000
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()
@@ -238,3 +238,7 @@ for i in range(25):
 	np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
 	np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)
 
+
+# Saving the last training batch for reference
+np.save("outputs/train_prediction.npy", batch_y_hat.cpu().data.numpy())
+np.save("outputs/train_truth.npy", batch_y.cpu().data.numpy())

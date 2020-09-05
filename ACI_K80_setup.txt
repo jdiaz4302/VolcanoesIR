@@ -1,0 +1,19 @@
+
+
+
+
+# Minimally modified from ACI documentation
+cd ~/work
+mkdir conda_gpu_tensorflow
+cd conda_gpu_tensorflow
+mkdir $PWD/conda_pkgs
+export CONDA_PKGS_DIRS=$PWD/conda_pkgs
+# The minimally modified part
+module load gcc/7.3.1
+module load python/3.6.3-anaconda5.0.1
+conda create -y --prefix $PWD
+source activate $PWD
+
+# Installing version of PyTorch available for the K80 OS
+conda install -y pytorch=0.4.1
+conda install pandas

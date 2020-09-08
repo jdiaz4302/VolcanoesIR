@@ -3,7 +3,7 @@
 
 
 # Training parameters
-batch_size = 56
+batch_size = 16
 
 
 # Libraries and imports

@@ -192,7 +192,7 @@ conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 100
+epochs = 1
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()
@@ -236,26 +236,38 @@ loss_array = np.asarray(loss_list)
 np.save('outputs/loss_over_iterations.npy', loss_array)
 
 
+# Trying to free GPU memory
+del batch_x
+del batch_t
+del batch_y
+del batch_y_hat
+del batch_loss
+torch.cuda.empty_cache()
+
+
 # Getting the loss value for the validation set
-valid_loss_list = []
-for data in validation_loader:
-	
-	# data loader
-	batch_x, batch_t, batch_y = data
-	
-	# move to GPU
-	batch_x = batch_x.to(device)
-	batch_t = batch_t.to(device)
-	batch_y = batch_y.to(device)
-	
-	# run model and get the prediction
-	# one batch_x for hidden transform, one for preserve
-	batch_y_hat = conv_time_lstm(batch_x, batch_x, batch_t)
-	batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
-	
-	# calculate and store the loss
-	batch_loss = loss(batch_y, batch_y_hat)
-	valid_loss_list.append(batch_loss.item())
+# torch.no_grad allows some efficiency with not tracking
+# values for optimization
+with torch.no_grad():
+	valid_loss_list = []
+	for data in validation_loader:
+		
+		# data loader
+		batch_x, batch_t, batch_y = data
+		
+		# move to GPU
+		batch_x = batch_x.to(device)
+		batch_t = batch_t.to(device)
+		batch_y = batch_y.to(device)
+		
+		# run model and get the prediction
+		# one batch_x for hidden transform, one for preserve
+		batch_y_hat = conv_time_lstm(batch_x, batch_x, batch_t)
+		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
+		
+		# calculate and store the loss
+		batch_loss = loss(batch_y, batch_y_hat)
+		valid_loss_list.append(batch_loss.item())
 
 
 # Converting loss values into array and saving

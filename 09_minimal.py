@@ -133,15 +133,17 @@ for vol in volcanoes:
 
 # Scale 0-1, replace NAs with scaled 0s
 print("Processing data")
-x_train = scale_and_remove_na(x_train)
-x_valid = scale_and_remove_na(x_valid)
-x_test = scale_and_remove_na(x_test)
-t_train = scale_and_remove_na(t_train)
-t_valid = scale_and_remove_na(t_valid)
-t_test = scale_and_remove_na(t_test)
-y_train = scale_and_remove_na(y_train)
-y_valid = scale_and_remove_na(y_valid)
-y_test = scale_and_remove_na(y_test)
+stored_parameters = np.zeros([2, 9])
+x_train, stored_parameters = scale_and_remove_na(x_train, stored_parameters, 0)
+x_valid, stored_parameters = scale_and_remove_na(x_valid, stored_parameters, 1)
+x_test, stored_parameters = scale_and_remove_na(x_test, stored_parameters, 2)
+t_train, stored_parameters = scale_and_remove_na(t_train, stored_parameters, 3)
+t_valid, stored_parameters = scale_and_remove_na(t_valid, stored_parameters, 4)
+t_test, stored_parameters = scale_and_remove_na(t_test, stored_parameters, 5)
+y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 6)
+y_valid, stored_parameters = scale_and_remove_na(y_valid, stored_parameters, 7)
+y_test, stored_parameters = scale_and_remove_na(y_test, stored_parameters, 8)
+np.save("outputs/transformation_parameters.npy", stored_parameters)
 
 
 # Convert to torch tensors
@@ -190,7 +192,7 @@ conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 1000
+epochs = 100
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()
@@ -224,9 +226,42 @@ for i in range(epochs):
 	print('Epoch: ', i, '\n\tMost recent batch loss: ', batch_loss.item(), '\n\t' + str(time_diff) + ' seconds elapsed')
 
 
+# Saving the last training batch for reference
+np.save("outputs/train_prediction.npy", batch_y_hat.cpu().data.numpy())
+np.save("outputs/train_truth.npy", batch_y.cpu().data.numpy())
+
+
 # Converting loss values into array and saving
 loss_array = np.asarray(loss_list)
 np.save('outputs/loss_over_iterations.npy', loss_array)
+
+
+# Getting the loss value for the validation set
+valid_loss_list = []
+for data in validation_loader:
+	
+	# data loader
+	batch_x, batch_t, batch_y = data
+	
+	# move to GPU
+	batch_x = batch_x.to(device)
+	batch_t = batch_t.to(device)
+	batch_y = batch_y.to(device)
+	
+	# run model and get the prediction
+	# one batch_x for hidden transform, one for preserve
+	batch_y_hat = conv_time_lstm(batch_x, batch_x, batch_t)
+	batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
+	
+	# calculate and store the loss
+	batch_loss = loss(batch_y, batch_y_hat)
+	valid_loss_list.append(batch_loss.item())
+
+
+# Converting loss values into array and saving
+valid_loss_array = np.asarray(valid_loss_list)
+np.save('outputs/final_valid_loss.npy', valid_loss_array)
+# The point of the above array is to sum for the whole-batch validation loss
 
 
 # Generate validation predictions
@@ -237,8 +272,3 @@ for i in range(25):
 	rand_y_hat = rand_y_hat.cpu().data.numpy()
 	np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
 	np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)
-
-
-# Saving the last training batch for reference
-np.save("outputs/train_prediction.npy", batch_y_hat.cpu().data.numpy())
-np.save("outputs/train_truth.npy", batch_y.cpu().data.numpy())

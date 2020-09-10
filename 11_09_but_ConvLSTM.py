@@ -164,16 +164,16 @@ print("Setting up methods")
 channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
-conv_time_lstm = ConvLSTM(input_size = (height, width), input_dim = channels, hidden_dim = [128, 64, 64, 5], kernel_size = (5, 5), num_layers = 4, batch_first = True, bias = True, return_all_layers = False, GPU = True)
+conv_lstm = ConvLSTM(input_size = (height, width), input_dim = channels, hidden_dim = [128, 64, 64, 5], kernel_size = (5, 5), num_layers = 4, batch_first = True, bias = True, return_all_layers = False, GPU = True)
 
 
 # Passing to GPU
-conv_time_lstm.cuda()
+conv_lstm.cuda()
 
 
 # Setting optimization methods
 loss = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(conv_time_lstm.parameters())
+optimizer = torch.optim.Adam(conv_lstm.parameters())
 
 
 # Defining data sets and loaders for parallelization option
@@ -185,7 +185,7 @@ validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_
 
 # Determining compute options (GPU? Parallel?)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-conv_time_lstm = torch.nn.DataParallel(conv_time_lstm)
+conv_lstm = torch.nn.DataParallel(conv_lstm)
 
 
 # Training loop
@@ -203,11 +203,12 @@ for i in range(epochs):
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
+		batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
 		# run model and get the prediction
 				# one batch_x for hidden transform, one for preserve
-		batch_y_hat = conv_time_lstm(batch_x)
+		batch_y_hat = conv_lstm(batch_x, batch_x, batch_t)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -256,11 +257,12 @@ with torch.no_grad():
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
+		batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
 		# run model and get the prediction
 		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = conv_time_lstm(batch_x)
+		batch_y_hat = conv_lstm(batch_x, batch_x, batch_t)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -279,7 +281,7 @@ with torch.no_grad():
 	for i in range(25):
 		rand_x, rand_t, rand_y = next(iter(validation_loader))
 		rand_y = rand_y.cpu().data.numpy()
-		rand_y_hat = conv_time_lstm(rand_x.to(device))[0][0][:, -2:-1, :, :, :]
+		rand_y_hat = conv_lstm(rand_x.to(device), rand_x.to(device), rand_t.to(device))[0][0][:, -2:-1, :, :, :]
 		rand_y_hat = rand_y_hat.cpu().data.numpy()
 		np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
 		np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)

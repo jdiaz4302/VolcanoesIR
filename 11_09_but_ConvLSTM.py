@@ -3,7 +3,7 @@
 
 
 # Training parameters
-batch_size = 16
+batch_size = 12
 
 
 # Libraries and imports
@@ -208,7 +208,7 @@ for i in range(epochs):
 		
 		# run model and get the prediction
 				# one batch_x for hidden transform, one for preserve
-		batch_y_hat = conv_lstm(batch_x, batch_x, batch_t)
+		batch_y_hat = conv_lstm(batch_x)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -262,7 +262,7 @@ with torch.no_grad():
 		
 		# run model and get the prediction
 		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = conv_lstm(batch_x, batch_x, batch_t)
+		batch_y_hat = conv_lstm(batch_x)
 		batch_y_hat = batch_y_hat[0][0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -281,7 +281,7 @@ with torch.no_grad():
 	for i in range(25):
 		rand_x, rand_t, rand_y = next(iter(validation_loader))
 		rand_y = rand_y.cpu().data.numpy()
-		rand_y_hat = conv_lstm(rand_x.to(device), rand_x.to(device), rand_t.to(device))[0][0][:, -2:-1, :, :, :]
+		rand_y_hat = conv_lstm(rand_x.to(device))[0][0][:, -2:-1, :, :, :]
 		rand_y_hat = rand_y_hat.cpu().data.numpy()
 		np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
 		np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)

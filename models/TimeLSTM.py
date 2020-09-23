@@ -19,7 +19,7 @@ class TimeLSTM(nn.Module):
         # Factor of 3 because forget gate was lost
         self.weights_h = nn.Parameter(torch.Tensor(hidden_sz, hidden_sz * 3))
         # Additionally, time differences are used in T1, T2, and output
-        self.weights_t = nn.Parameter(torch.Tensor(input_sz, hidden_sz * 3))
+        self.weights_t = nn.Parameter(torch.Tensor(1, hidden_sz * 3))
         # Adapted for i, t1, t2, c, and o
         self.bias = nn.Parameter(torch.Tensor(hidden_sz * 5))
         self.init_weights()
@@ -50,7 +50,7 @@ class TimeLSTM(nn.Module):
             # Input gate
             i_t = x_t @ self.weights_x[:, :HS] + h_t @ self.weights_h[:, :HS] + self.bias[:HS]
             i_t = torch.sigmoid(i_t)
-            # Time one gate, NEED TO CONSTRAIN
+            # Time one gate
             self.weights_t[:, :HS] = torch.nn.Parameter(self.weights_t[:, :HS].clamp(max = 0))
             t1_t = torch.tanh(TimeDiff_t @ self.weights_t[:, :HS])
             t1_t = x_t @ self.weights_x[:, HS:HS*2] + t1_t + self.bias[HS:HS*2]
@@ -60,7 +60,6 @@ class TimeLSTM(nn.Module):
             t2_t = x_t @ self.weights_x[:, HS*2:HS*3] + t2_t + self.bias[HS*2:HS*3]
             t2_t = torch.sigmoid(t2_t)
             # C shared components
-            print(x_t.shape, self.weights_x[:, HS*3:HS*4].shape, h_t.shape, self.weights_h[:, HS:HS*2].shape)
             c_weight_application_t = x_t @ self.weights_x[:, HS*3:HS*4] + h_t @ self.weights_h[:, HS:HS*2]
             c_weight_application_t = torch.tanh(c_weight_application_t + self.bias[HS*3:HS*4])
             # Two C gates

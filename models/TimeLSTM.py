@@ -73,7 +73,7 @@ class TimeLSTM(nn.Module):
             o_t = o_t + h_t @ self.weights_h[:, HS*2:] + self.bias[HS*4:]
             o_t = torch.sigmoid(o_t)
             # Hidden
-            h_t = o_t + torch.tanh(c_t)
+            h_t = o_t + torch.tanh(c_tilde_t)
             hidden_seq.append(h_t.unsqueeze(Dim.batch))
         hidden_seq = torch.cat(hidden_seq, dim=Dim.batch)
         # reshape from shape (sequence, batch, feature) to (batch, sequence, feature)

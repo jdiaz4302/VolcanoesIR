@@ -8,7 +8,7 @@ class Dim(IntEnum):
     seq = 1
     feature = 2
 
-
+# Building the base TimeLSTM class
 class TimeLSTM(nn.Module):
     def __init__(self, input_sz: int, hidden_sz: int):
         super().__init__()
@@ -78,3 +78,24 @@ class TimeLSTM(nn.Module):
         # reshape from shape (sequence, batch, feature) to (batch, sequence, feature)
         hidden_seq = hidden_seq.transpose(Dim.batch, Dim.seq).contiguous()
         return hidden_seq, (h_t, c_t)
+
+
+# Stacking the base TimeLSTM class 4 times for a deeper network
+class StackedTimeLSTM(torch.nn.Module):
+    def __init__(self, input_sz, layer_sizes):
+        """Simply stacking the simple TimeLSTM for multilayer model"""
+        super(StackedTimeLSTM, self).__init__()
+        self.layer_sizes = layer_sizes
+        # Wanting more/less than 4 layers will require manual editting
+        assert(len(self.layer_sizes) == 4)
+        self.linear1 = TimeLSTM(input_sz, self.layer_sizes[0])
+        self.linear2 = TimeLSTM(self.layer_sizes[0], self.layer_sizes[1])
+        self.linear3 = TimeLSTM(self.layer_sizes[1], self.layer_sizes[2])
+        self.linear4 = TimeLSTM(self.layer_sizes[2], self.layer_sizes[3])
+
+    def forward(self, x):
+        h1 = self.linear1(x)
+        h2 = self.linear1(h1)
+        h3 = self.linear1(h2)
+        o = self.linear1(h3)
+        return o

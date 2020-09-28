@@ -88,14 +88,14 @@ class StackedTimeLSTM(torch.nn.Module):
         self.layer_sizes = layer_sizes
         # Wanting more/less than 4 layers will require manual editting
         assert(len(self.layer_sizes) == 4)
-        self.linear1 = TimeLSTM(input_sz, self.layer_sizes[0])
-        self.linear2 = TimeLSTM(self.layer_sizes[0], self.layer_sizes[1])
-        self.linear3 = TimeLSTM(self.layer_sizes[1], self.layer_sizes[2])
-        self.linear4 = TimeLSTM(self.layer_sizes[2], self.layer_sizes[3])
+        self.layer1 = TimeLSTM(input_sz, self.layer_sizes[0])
+        self.layer2 = TimeLSTM(self.layer_sizes[0], self.layer_sizes[1])
+        self.layer3 = TimeLSTM(self.layer_sizes[1], self.layer_sizes[2])
+        self.layer4 = TimeLSTM(self.layer_sizes[2], self.layer_sizes[3])
 
-    def forward(self, x):
-        h1 = self.linear1(x)
-        h2 = self.linear1(h1)
-        h3 = self.linear1(h2)
-        o = self.linear1(h3)
+    def forward(self, x, t):
+        h1, _ = self.layer1(x, t)
+        h2, _ = self.layer2(h1, t)
+        h3, _ = self.layer3(h2, t)
+        o, _ = self.layer4(h3, t)
         return o

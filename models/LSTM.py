@@ -3,6 +3,11 @@ import torch
 import torch.nn as nn
 from enum import IntEnum
 
+class Dim(IntEnum):
+    batch = 0
+    seq = 1
+    feature = 2
+
 # Simple LSTM made from scratch
 class OptimizedLSTM(nn.Module):
     def __init__(self, input_sz: int, hidden_sz: int):

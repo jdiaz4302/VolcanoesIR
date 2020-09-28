@@ -51,6 +51,7 @@ class TimeLSTM(nn.Module):
             # batch the computations into a single matrix multiplication
             # And apply all TimeLSTM equations
             # Input gate
+            print(type(x_t), type(self.weights_x[:, :HS]), type(h_t), type(self.weights_h[:, :HS]), type(self.bias[:HS]))
             i_t = x_t @ self.weights_x[:, :HS] + h_t @ self.weights_h[:, :HS] + self.bias[:HS]
             i_t = torch.sigmoid(i_t)
             # Time one gate

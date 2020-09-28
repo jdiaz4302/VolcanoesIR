@@ -21,9 +21,7 @@ class OptimizedLSTM(nn.Module):
             else:
                 nn.init.zeros_(p.data)
         
-    def forward(self, x: torch.Tensor, 
-                init_states: Optional[Tuple[torch.Tensor]]=None
-               ) -> Tuple[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+    def forward(self, x, init_states = None):
         """Assumes x is of shape (batch, sequence, feature)"""
         bs, seq_sz, _ = x.size()
         hidden_seq = []

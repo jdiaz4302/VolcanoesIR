@@ -55,9 +55,9 @@ class TimeLSTM(nn.Module):
             i_t = torch.sigmoid(i_t)
             # Time one gate
             self.weights_t[:, :HS] = torch.nn.Parameter(self.weights_t[:, :HS].clamp(max = 0))
-            t1_t = TimeDiff_t @ self.weights_t[:, :HS]
-            t1_t = torch.tanh(t1_t)
-            t1_t = x_t @ self.weights_x[:, HS:HS*2] + t1_t + self.bias[HS:HS*2]
+            t1_t_inner = TimeDiff_t @ self.weights_t[:, :HS]
+            t1_t_inner = torch.tanh(t1_t_inner)
+            t1_t = x_t @ self.weights_x[:, HS:HS*2] + t1_t_inner + self.bias[HS:HS*2]
             t1_t = torch.sigmoid(t1_t)
             # Time two gate
             t2_t = torch.tanh(TimeDiff_t @ self.weights_t[:, HS:HS*2])

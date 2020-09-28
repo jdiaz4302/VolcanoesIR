@@ -98,4 +98,4 @@ class StackedTimeLSTM(torch.nn.Module):
         h2, _ = self.layer2(h1, t)
         h3, _ = self.layer3(h2, t)
         o, _ = self.layer4(h3, t)
-        return o
+        return o, _

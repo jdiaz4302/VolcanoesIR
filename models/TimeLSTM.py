@@ -10,10 +10,11 @@ class Dim(IntEnum):
 
 # Building the base TimeLSTM class
 class TimeLSTM(nn.Module):
-    def __init__(self, input_sz: int, hidden_sz: int):
+    def __init__(self, input_sz, hidden_sz, GPU):
         super().__init__()
         self.input_sz = input_sz
         self.hidden_size = hidden_sz
+        self.GPU = GPU
         # Factor of 5 (not 4) because input and forget are but there are two Ts
         self.weights_x = nn.Parameter(torch.Tensor(input_sz, hidden_sz * 5))
         # Factor of 3 because forget gate was lost
@@ -40,6 +41,8 @@ class TimeLSTM(nn.Module):
                         torch.zeros(self.hidden_size).to(x.device))
         else:
             h_t, c_t = init_states
+        if self.GPU:
+            h_t, c_t = (h_t.cuda(), c_t.cuda())
         
         HS = self.hidden_size
         for t in range(seq_sz):
@@ -82,16 +85,18 @@ class TimeLSTM(nn.Module):
 
 # Stacking the base TimeLSTM class 4 times for a deeper network
 class StackedTimeLSTM(torch.nn.Module):
-    def __init__(self, input_sz, layer_sizes):
+    def __init__(self, input_sz, layer_sizes, GPU):
         """Simply stacking the simple TimeLSTM for multilayer model"""
         super(StackedTimeLSTM, self).__init__()
+        self.input_sz = input_sz
         self.layer_sizes = layer_sizes
+        self.GPU = GPU
         # Wanting more/less than 4 layers will require manual editting
         assert(len(self.layer_sizes) == 4)
-        self.layer1 = TimeLSTM(input_sz, self.layer_sizes[0])
-        self.layer2 = TimeLSTM(self.layer_sizes[0], self.layer_sizes[1])
-        self.layer3 = TimeLSTM(self.layer_sizes[1], self.layer_sizes[2])
-        self.layer4 = TimeLSTM(self.layer_sizes[2], self.layer_sizes[3])
+        self.layer1 = TimeLSTM(input_sz, self.layer_sizes[0], self.GPU)
+        self.layer2 = TimeLSTM(self.layer_sizes[0], self.layer_sizes[1], self.GPU)
+        self.layer3 = TimeLSTM(self.layer_sizes[1], self.layer_sizes[2], self.GPU)
+        self.layer4 = TimeLSTM(self.layer_sizes[2], self.layer_sizes[3], self.GPU)
 
     def forward(self, x, t):
         h1, _ = self.layer1(x, t)

@@ -16,13 +16,15 @@ class TimeLSTM(nn.Module):
         self.hidden_size = hidden_sz
         self.GPU = GPU
         # Factor of 5 (not 4) because input and forget are but there are two Ts
-        self.weights_x = nn.Parameter(torch.Tensor(input_sz, hidden_sz * 5))
+        self.weights_x = nn.Parameter(torch.randn(input_sz, hidden_sz * 5))
         # Factor of 3 because forget gate was lost
-        self.weights_h = nn.Parameter(torch.Tensor(hidden_sz, hidden_sz * 3))
-        # Additionally, time differences are used in T1, T2, and output
-        self.weights_t = nn.Parameter(torch.Tensor(1, hidden_sz * 3))
+        self.weights_h = nn.Parameter(torch.randn(hidden_sz, hidden_sz * 3))
+        # Additionally, time differences are used in T1...
+        self.weights_t1 = nn.Parameter(torch.randn(1, hidden_sz))
+        # And, separately (due to constraints): T2 and output
+        self.weights_t = nn.Parameter(torch.randn(1, hidden_sz * 2))
         # Adapted for i, t1, t2, c, and o
-        self.bias = nn.Parameter(torch.Tensor(hidden_sz * 5))
+        self.bias = nn.Parameter(torch.randn(hidden_sz * 5))
         self.init_weights()
     
     def init_weights(self):
@@ -51,17 +53,16 @@ class TimeLSTM(nn.Module):
             # batch the computations into a single matrix multiplication
             # And apply all TimeLSTM equations
             # Input gate
-            print(type(x_t), type(self.weights_x[:, :HS]), type(h_t), type(self.weights_h[:, :HS]), type(self.bias[:HS]))
             i_t = x_t @ self.weights_x[:, :HS] + h_t @ self.weights_h[:, :HS] + self.bias[:HS]
             i_t = torch.sigmoid(i_t)
             # Time one gate
-            #self.weights_t[:, :HS] = torch.nn.Parameter(self.weights_t[:, :HS].clamp(max = 0))
-            t1_t_inner = TimeDiff_t @ self.weights_t[:, :HS]
+            self.weights_t1 = torch.nn.Parameter(self.weights_t1.clamp(max = 0))
+            t1_t_inner = TimeDiff_t @ self.weights_t1
             t1_t_inner = torch.tanh(t1_t_inner)
             t1_t = x_t @ self.weights_x[:, HS:HS*2] + t1_t_inner + self.bias[HS:HS*2]
             t1_t = torch.sigmoid(t1_t)
             # Time two gate
-            t2_t = torch.tanh(TimeDiff_t @ self.weights_t[:, HS:HS*2])
+            t2_t = torch.tanh(TimeDiff_t @ self.weights_t[:, :HS])
             t2_t = x_t @ self.weights_x[:, HS*2:HS*3] + t2_t + self.bias[HS*2:HS*3]
             t2_t = torch.sigmoid(t2_t)
             # C shared components
@@ -73,7 +74,7 @@ class TimeLSTM(nn.Module):
             c_t = ((1 - i_t)*c_t) + (i_t * t2_t * c_weight_application_t)
             c_t = torch.sigmoid(c_t)
             # Output
-            o_t = x_t @ self.weights_x[:, HS*4:] + TimeDiff_t @ self.weights_t[:, HS*2:]
+            o_t = x_t @ self.weights_x[:, HS*4:] + TimeDiff_t @ self.weights_t[:, HS:]
             o_t = o_t + h_t @ self.weights_h[:, HS*2:] + self.bias[HS*4:]
             o_t = torch.sigmoid(o_t)
             # Hidden

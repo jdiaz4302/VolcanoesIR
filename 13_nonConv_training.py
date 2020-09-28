@@ -3,7 +3,7 @@
 
 
 # Training parameters
-batch_size = 16
+batch_size = 4
 
 
 # Libraries and imports
@@ -164,7 +164,7 @@ print("Setting up methods")
 channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
-time_lstm = StackedTimeLSTM(input_sz = channels, layer_sizes = [128, 64, 64, channels])
+time_lstm = StackedTimeLSTM(input_sz = channels, layer_sizes = [128, 64, 64, channels], GPU = True)
 
 
 # Passing to GPU
@@ -192,7 +192,7 @@ time_lstm = torch.nn.DataParallel(time_lstm)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 100
+epochs = 2
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()
@@ -200,17 +200,17 @@ for i in range(epochs):
 		
 		# data loader
 		batch_x, batch_t, batch_y = data
-        
-        # reshaping data
-        x_sh = batch_x.shape
-        batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-        t_sh = batch_t.shape
-        batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-        # This next line is fragile to the assumption that
-        # bands have the same sampling time difference
-        batch_t = batch_t[:,:,0]
-        # We wont reshape y, instead y_hat to fit y
-        y_sh = batch_y.shape
+		
+		# reshaping data
+		x_sh = batch_x.shape
+		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+		t_sh = batch_t.shape
+		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+		# This next line is fragile to the assumption that
+		# bands have the same sampling time difference
+		batch_t = batch_t[:,:,0:1]
+		# We wont reshape y, instead y_hat to fit y
+		y_sh = batch_y.shape
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
@@ -219,9 +219,9 @@ for i in range(epochs):
 		
 		# run model and get the prediction
 		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = time_lstm(batch_x, batch_t)
-        batch_y_hat = batch_y.view(x_sh)
-		batch_y_hat = batch_y_hat[0][:, -2:-1, :, :, :]
+		batch_y_hat = time_lstm(batch_x, batch_t)[0]
+		batch_y_hat = batch_y_hat.view(x_sh)
+		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
 		batch_loss = loss(batch_y, batch_y_hat)
@@ -266,17 +266,17 @@ with torch.no_grad():
 		
 		# data loader
 		batch_x, batch_t, batch_y = data
-        
-        # reshaping data
-        x_sh = batch_x.shape
-        batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-        t_sh = batch_t.shape
-        batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-        # This next line is fragile to the assumption that
-        # bands have the same sampling time difference
-        batch_t = batch_t[:,:,0]
-        # We wont reshape y, instead y_hat to fit y
-        y_sh = batch_y.shape
+		
+		# reshaping data
+		x_sh = batch_x.shape
+		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+		t_sh = batch_t.shape
+		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+		# This next line is fragile to the assumption that
+		# bands have the same sampling time difference
+		batch_t = batch_t[:,:,0]
+		# We wont reshape y, instead y_hat to fit y
+		y_sh = batch_y.shape
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
@@ -286,8 +286,8 @@ with torch.no_grad():
 		# run model and get the prediction
 		# one batch_x for hidden transform, one for preserve
 		batch_y_hat = time_lstm(batch_x, batch_t)
-        # y_hat has the same structure as the input x
-        batch_y_hat = batch_y.view(x_sh)
+		# y_hat has the same structure as the input x
+		batch_y_hat = batch_y.view(x_sh)
 		batch_y_hat = batch_y_hat[0][:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -305,17 +305,17 @@ np.save('outputs/final_valid_loss.npy', valid_loss_array)
 with torch.no_grad():
 	for i in range(25):
 		rand_x, rand_t, rand_y = next(iter(validation_loader))
-        x_sh = batch_x.shape
-        batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-        t_sh = batch_t.shape
-        batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-        batch_t = batch_t[:,:,0]
-        # We wont reshape y, instead y_hat to fit y
-        y_sh = batch_y.shape
+		x_sh = batch_x.shape
+		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+		t_sh = batch_t.shape
+		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+		batch_t = batch_t[:,:,0]
+		# We wont reshape y, instead y_hat to fit y
+		y_sh = batch_y.shape
 		rand_y = rand_y.cpu().data.numpy()
 		rand_y_hat = conv_time_lstm(rand_x.to(device), rand_t.to(device))
-        rany_y_hat = rand_y_hat.view(x_sh)
-        rand_y_hat = rand_y_hat[0][:, -2:-1, :, :, :]
+		rany_y_hat = rand_y_hat.view(x_sh)
+		rand_y_hat = rand_y_hat[0][:, -2:-1, :, :, :]
 		rand_y_hat = rand_y_hat.cpu().data.numpy()
 		np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
 		np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)

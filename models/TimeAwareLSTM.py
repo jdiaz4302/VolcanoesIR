@@ -8,12 +8,13 @@ class Dim(IntEnum):
     seq = 1
     feature = 2
 
-
+# Building the base TimeAwareLSTM class
 class TimeAwareLSTM(nn.Module):
-    def __init__(self, input_sz: int, hidden_sz: int):
+    def __init__(self, input_sz: int, hidden_sz: int, GPU):
         super().__init__()
         self.input_sz = input_sz
         self.hidden_size = hidden_sz
+        self.GPU = GPU
         self.weights_x = nn.Parameter(torch.Tensor(input_sz, hidden_sz * 4))
         self.weights_h = nn.Parameter(torch.Tensor(hidden_sz, hidden_sz * 4))
         # Additionally, weights for adjusting memory by time differences
@@ -38,6 +39,8 @@ class TimeAwareLSTM(nn.Module):
                         torch.zeros(self.hidden_size).to(x.device))
         else:
             h_t, c_t = init_states
+        if self.GPU:
+            h_t, c_t = (h_t.cuda(), c_t.cuda())
         
         HS = self.hidden_size
         for t in range(seq_sz):
@@ -75,3 +78,26 @@ class TimeAwareLSTM(nn.Module):
         # reshape from shape (sequence, batch, feature) to (batch, sequence, feature)
         hidden_seq = hidden_seq.transpose(Dim.batch, Dim.seq).contiguous()
         return hidden_seq, (h_t, c_t)
+
+
+# Stacking the base TimeAwareLSTM class 4 times for a deeper network
+class StackedTimeAwareLSTM(torch.nn.Module):
+    def __init__(self, input_sz, layer_sizes, GPU):
+        """Simply stacking the simple TimeLSTM for multilayer model"""
+        super(StackedTimeAwareLSTM, self).__init__()
+        self.input_sz = input_sz
+        self.layer_sizes = layer_sizes
+        self.GPU = GPU
+        # Wanting more/less than 4 layers will require manual editting
+        assert(len(self.layer_sizes) == 4)
+        self.layer1 = TimeAwareLSTM(input_sz, self.layer_sizes[0], self.GPU)
+        self.layer2 = TimeAwareLSTM(self.layer_sizes[0], self.layer_sizes[1], self.GPU)
+        self.layer3 = TimeAwareLSTM(self.layer_sizes[1], self.layer_sizes[2], self.GPU)
+        self.layer4 = TimeAwareLSTM(self.layer_sizes[2], self.layer_sizes[3], self.GPU)
+
+    def forward(self, x, t):
+        h1, _ = self.layer1(x, t)
+        h2, _ = self.layer2(h1, t)
+        h3, _ = self.layer3(h2, t)
+        o, _ = self.layer4(h3, t)
+        return o, _

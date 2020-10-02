@@ -275,7 +275,7 @@ with torch.no_grad():
 		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
 		# This next line is fragile to the assumption that
 		# bands have the same sampling time difference
-		batch_t = batch_t[:,:,0]
+		batch_t = batch_t[:,:,0:1]
 		# We wont reshape y, instead y_hat to fit y
 		y_sh = batch_y.shape
 		
@@ -310,7 +310,7 @@ with torch.no_grad():
 		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
 		t_sh = batch_t.shape
 		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-		batch_t = batch_t[:,:,0]
+		batch_t = batch_t[:,:,0:1]
 		# We wont reshape y, instead y_hat to fit y
 		y_sh = batch_y.shape
 		rand_y = rand_y.cpu().data.numpy()

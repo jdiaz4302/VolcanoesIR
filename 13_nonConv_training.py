@@ -15,7 +15,8 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 from torch.utils import data
-from models.TimeLSTM import StackedTimeLSTM
+# Change this as needed: LSTM, (Stacked)TimeLSTM, (Stacked)TimeAwareLSTM
+from models.TimeLSTM import StackedTimeLSTM as LSTM_Variant
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 
@@ -164,16 +165,16 @@ print("Setting up methods")
 channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
-time_lstm = StackedTimeLSTM(input_sz = channels, layer_sizes = [128, 64, 64, channels], GPU = True)
+lstm_variant = LSTM_Variant(input_sz = channels, layer_sizes = [128, 64, 64, channels], GPU = True)
 
 
 # Passing to GPU
-time_lstm.cuda()
+lstm_variant.cuda()
 
 
 # Setting optimization methods
 loss = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(time_lstm.parameters())
+optimizer = torch.optim.Adam(lstm_variant.parameters())
 
 
 # Defining data sets and loaders for parallelization option
@@ -185,7 +186,7 @@ validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_
 
 # Determining compute options (GPU? Parallel?)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-time_lstm = torch.nn.DataParallel(time_lstm)
+lstm_variant = torch.nn.DataParallel(lstm_variant)
 
 
 # Training loop
@@ -219,7 +220,7 @@ for i in range(epochs):
 		
 		# run model and get the prediction
 		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = time_lstm(batch_x, batch_t)[0]
+		batch_y_hat = lstm_variant(batch_x, batch_t)[0]
 		batch_y_hat = batch_y_hat.view(x_sh)
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
 		
@@ -285,7 +286,7 @@ with torch.no_grad():
 		
 		# run model and get the prediction
 		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = time_lstm(batch_x, batch_t)
+		batch_y_hat = lstm_variant(batch_x, batch_t)
 		# y_hat has the same structure as the input x
 		batch_y_hat = batch_y.view(x_sh)
 		batch_y_hat = batch_y_hat[0][:, -2:-1, :, :, :]
@@ -313,7 +314,7 @@ with torch.no_grad():
 		# We wont reshape y, instead y_hat to fit y
 		y_sh = batch_y.shape
 		rand_y = rand_y.cpu().data.numpy()
-		rand_y_hat = conv_time_lstm(rand_x.to(device), rand_t.to(device))
+		rand_y_hat = lstm_variant(rand_x.to(device), rand_t.to(device))
 		rany_y_hat = rand_y_hat.view(x_sh)
 		rand_y_hat = rand_y_hat[0][:, -2:-1, :, :, :]
 		rand_y_hat = rand_y_hat.cpu().data.numpy()

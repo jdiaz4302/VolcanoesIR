@@ -51,8 +51,7 @@
 
 # Gathering function inputs
 model_selection = input("Which model do you select?")
-assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM',
-                           'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
 training_data_set = input("Which set of training data do you want to use?")
 
 
@@ -64,16 +63,9 @@ assert((training_data_set in volcanoes) or (training_data_set == "all"))
 
 # Training parameters
 # This needs to actually be variable, will do with later exploration
-batch_size = batch_size_dict{'LSTM':4,
-                             'Time-LSTM':4,
-                             'Time-Aware LSTM':4,
-                             'ConvLSTM':4,
-                             'ConvTimeLSTM':4,
-                             'ConvTimeAwareLSTM':4}
+batch_size = batch_size_dict{'LSTM':4, 'Time-LSTM':4, 'Time-Aware LSTM':4, 'ConvLSTM':4, 'ConvTimeLSTM':4, 'ConvTimeAwareLSTM':4}
 print("W A R N I N G: Further exploratory work needded for variable batch size")
-num_input_scenes = lag_dict{"all":6, "ErtaAle":9, "Kilauea":10,
-                            "Masaya":3, "Nyamuragira":3, "Nyiragongo":3,
-                            "Pacaya":4, "Puuoo":8}
+num_input_scenes = lag_dict{"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
 train_percent = 0.70
 out_samp_perc = 0.15
 
@@ -271,26 +263,41 @@ for i in range(epochs):
 		# data loader
 		batch_x, batch_t, batch_y = data
 		
-		# reshaping data
-		x_sh = batch_x.shape
-		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-		t_sh = batch_t.shape
-		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-		# This next line is fragile to the assumption that
-		# bands have the same sampling time difference
-		batch_t = batch_t[:,:,0:1]
-		# We wont reshape y, instead y_hat to fit y
-		y_sh = batch_y.shape
+		# reshaping data if needed for non-spatial LSTMs
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            x_sh = batch_x.shape
+            batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+            # We wont reshape y, instead y_hat to fit y
+            y_sh = batch_y.shape
+        # Only further processing time in a time-conscious, non-spatial LSTM
+        if model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            t_sh = batch_t.shape
+            batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+            # This next line is fragile to the assumption that
+            # bands have the same sampling time difference
+            batch_t = batch_t[:,:,0:1]
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
-		batch_t = batch_t.to(device)
+        # Only move time tensors to GPU if time-conscious LSTM
+        if model_selection not in ['LSTM', 'ConvLSTM']:
+            batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
-		# run model and get the prediction
-		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = lstm_model(batch_x, batch_t)[0]
-		batch_y_hat = batch_y_hat.view(x_sh)
+		# Run the model, determining forward pass based on model selected
+        if model_selection in ['LSTM', 'ConvLSTM']
+            batch_y_hat = lstm_model(batch_x)
+        elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = lstm_model(batch_x, batch_t)
+        elif model_selection == 'ConvTimeLSTM':
+            batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
+        
+        # Extracting the target prediction based on model output
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = batch_y_hat[0]
+            batch_y_hat = batch_y_hat.view(x_sh)
+        else:
+            batch_y_hat = batch_y_hat[0][0]
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
 		
 		# calculate and store the loss
@@ -337,27 +344,41 @@ with torch.no_grad():
 		# data loader
 		batch_x, batch_t, batch_y = data
 		
-		# reshaping data
-		x_sh = batch_x.shape
-		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-		t_sh = batch_t.shape
-		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-		# This next line is fragile to the assumption that
-		# bands have the same sampling time difference
-		batch_t = batch_t[:,:,0:1]
-		# We wont reshape y, instead y_hat to fit y
-		y_sh = batch_y.shape
+		# reshaping data if needed for non-spatial LSTMs
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            x_sh = batch_x.shape
+            batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+            # We wont reshape y, instead y_hat to fit y
+            y_sh = batch_y.shape
+        # Only further processing time in a time-conscious, non-spatial LSTM
+        if model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            t_sh = batch_t.shape
+            batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+            # This next line is fragile to the assumption that
+            # bands have the same sampling time difference
+            batch_t = batch_t[:,:,0:1]
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
-		batch_t = batch_t.to(device)
+        # Only move time tensors to GPU if time-conscious LSTM
+        if model_selection not in ['LSTM', 'ConvLSTM']:
+            batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
-		# run model and get the prediction
-		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = lstm_model(batch_x, batch_t)[0]
-		# y_hat has the same structure as the input x
-		batch_y_hat = batch_y_hat.view(x_sh)
+		# Run the model, determining forward pass based on model selected
+        if model_selection in ['LSTM', 'ConvLSTM']
+            batch_y_hat = lstm_model(batch_x)
+        elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = lstm_model(batch_x, batch_t)
+        elif model_selection == 'ConvTimeLSTM':
+            batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
+        
+        # Extracting the target prediction based on model output
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = batch_y_hat[0]
+            batch_y_hat = batch_y_hat.view(x_sh)
+        else:
+            batch_y_hat = batch_y_hat[0][0]
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
         
         # Moving data off GPU now that model has ran
@@ -398,27 +419,41 @@ with torch.no_grad():
 		# data loader
 		batch_x, batch_t, batch_y = data
 		
-		# reshaping data
-		x_sh = batch_x.shape
-		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-		t_sh = batch_t.shape
-		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-		# This next line is fragile to the assumption that
-		# bands have the same sampling time difference
-		batch_t = batch_t[:,:,0:1]
-		# We wont reshape y, instead y_hat to fit y
-		y_sh = batch_y.shape
+		# reshaping data if needed for non-spatial LSTMs
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            x_sh = batch_x.shape
+            batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+            # We wont reshape y, instead y_hat to fit y
+            y_sh = batch_y.shape
+        # Only further processing time in a time-conscious, non-spatial LSTM
+        if model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            t_sh = batch_t.shape
+            batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+            # This next line is fragile to the assumption that
+            # bands have the same sampling time difference
+            batch_t = batch_t[:,:,0:1]
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
-		batch_t = batch_t.to(device)
+        # Only move time tensors to GPU if time-conscious LSTM
+        if model_selection not in ['LSTM', 'ConvLSTM']:
+            batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
-		# run model and get the prediction
-		# one batch_x for hidden transform, one for preserve
-		batch_y_hat = lstm_model(batch_x, batch_t)[0]
-		# y_hat has the same structure as the input x
-		batch_y_hat = batch_y_hat.view(x_sh)
+		# Run the model, determining forward pass based on model selected
+        if model_selection in ['LSTM', 'ConvLSTM']
+            batch_y_hat = lstm_model(batch_x)
+        elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = lstm_model(batch_x, batch_t)
+        elif model_selection == 'ConvTimeLSTM':
+            batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
+        
+        # Extracting the target prediction based on model output
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = batch_y_hat[0]
+            batch_y_hat = batch_y_hat.view(x_sh)
+        else:
+            batch_y_hat = batch_y_hat[0][0]
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
         
         # Moving data off GPU now that model has ran
@@ -451,21 +486,34 @@ with torch.no_grad():
 np.save('outputs/final_valid_loss.npy', np.asarray(valid_set_loss))
 
 
-# Generate validation predictions
+# Generate some validation predictions
 with torch.no_grad():
 	for i in range(25):
-		rand_x, rand_t, rand_y = next(iter(validation_loader))
-		x_sh = rand_x.shape
-		rand_x = rand_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-		t_sh = rand_t.shape
-		rand_t = rand_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-		rand_t = rand_t[:,:,0:1]
-		# We wont reshape y, instead y_hat to fit y
-		y_sh = rand_y.shape
-		rand_y = rand_y.cpu().data.numpy()
-		rand_y_hat = lstm_model(rand_x.to(device), rand_t.to(device))[0]
-		rand_y_hat = rand_y_hat.view(x_sh)
-		rand_y_hat = rand_y_hat[:, -2:-1, :, :, :]
-		rand_y_hat = rand_y_hat.cpu().data.numpy()
-		np.save("outputs/valid_prediction_" + str(i) + ".npy", rand_y_hat)
-		np.save("outputs/valid_truth_" + str(i) + ".npy", rand_y)
+		batch_x, batch_t, batch_y = next(iter(validation_loader))
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            x_sh = batch_x.shape
+            batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+            y_sh = batch_y.shape
+        if model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            t_sh = batch_t.shape
+            batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+            batch_t = batch_t[:,:,0:1]
+		batch_x = batch_x.to(device)
+        if model_selection not in ['LSTM', 'ConvLSTM']:
+            batch_t = batch_t.to(device)
+		batch_y = batch_y.to(device)
+        if model_selection in ['LSTM', 'ConvLSTM']
+            batch_y_hat = lstm_model(batch_x)
+        elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = lstm_model(batch_x, batch_t)
+        elif model_selection == 'ConvTimeLSTM':
+            batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
+        if model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM']:
+            batch_y_hat = batch_y_hat[0]
+            batch_y_hat = batch_y_hat.view(x_sh)
+        else:
+            batch_y_hat = batch_y_hat[0][0]
+		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
+		batch_y_hat = batch_y_hat.cpu().data.numpy()
+		np.save("outputs/valid_prediction_" + str(i) + ".npy", batch_y_hat)
+		np.save("outputs/valid_truth_" + str(i) + ".npy", batch_y)

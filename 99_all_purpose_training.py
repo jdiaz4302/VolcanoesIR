@@ -327,11 +327,72 @@ del batch_loss
 torch.cuda.empty_cache()
 
 
-# Getting the loss value for the validation set
-# torch.no_grad allows some efficiency with not tracking
+# Getting the loss value for the whole training set
+# torch.no_grad allows some efficiency by not tracking
 # values for optimization
 with torch.no_grad():
-	valid_loss_list = []
+    count = 0
+	for data in train_loader:
+		
+		# data loader
+		batch_x, batch_t, batch_y = data
+		
+		# reshaping data
+		x_sh = batch_x.shape
+		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+		t_sh = batch_t.shape
+		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+		# This next line is fragile to the assumption that
+		# bands have the same sampling time difference
+		batch_t = batch_t[:,:,0:1]
+		# We wont reshape y, instead y_hat to fit y
+		y_sh = batch_y.shape
+		
+		# move to GPU
+		batch_x = batch_x.to(device)
+		batch_t = batch_t.to(device)
+		batch_y = batch_y.to(device)
+		
+		# run model and get the prediction
+		# one batch_x for hidden transform, one for preserve
+		batch_y_hat = lstm_model(batch_x, batch_t)[0]
+		# y_hat has the same structure as the input x
+		batch_y_hat = batch_y_hat.view(x_sh)
+		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
+        
+        # Moving data off GPU now that model has ran
+        batch_y = batch_y.cpu()
+        batch_y_hat = batch_y_hat.cpu()
+        
+        # Transformating the data to temperature values
+        train_y_min = torch.from_numpy(stored_parameters[0, 0])
+        train_y_max = torch.from_numpy(stored_parameters[1, 0])
+        batch_y = (batch_y * (train_y_max - train_y_min)) + train_y_min
+        batch_y_hat = (batch_y_hat * (train_y_max - train_y_min)) + train_y_min
+        
+        # Storing all temperature-valued truths and predictions for
+        # one root mean squared error calculation to get error in
+        # terms of temperature
+        if count == 0:
+            cpu_y_temps = batch_y
+            cpu_y_hat_temps = batch_y_hat
+        else:
+            cpu_y_temps = torch.cat([cpu_y_temps, batch_y], dim = 0)
+            cpu_y_hat_temps = torch.cat([cpu_y_hat_temps, batch_y_hat], dim = 0)
+        count = count + 1
+	# calculate and store the loss
+	train_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
+    train_set_loss = torch.sqrt(train_set_loss)
+    train_set_loss = train_set_loss.item()
+
+
+# Saving the training set loss
+np.save('outputs/final_train_loss.npy', np.asarray(train_set_loss))
+
+
+# Getting the loss value for the whole validation set
+with torch.no_grad():
+    count = 0
 	for data in validation_loader:
 		
 		# data loader
@@ -359,16 +420,35 @@ with torch.no_grad():
 		# y_hat has the same structure as the input x
 		batch_y_hat = batch_y_hat.view(x_sh)
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
-		
-		# calculate and store the loss
-		batch_loss = loss(batch_y, batch_y_hat)
-		valid_loss_list.append(batch_loss.item())
+        
+        # Moving data off GPU now that model has ran
+        batch_y = batch_y.cpu()
+        batch_y_hat = batch_y_hat.cpu()
+        
+        # Transformating the data to temperature values
+        valid_y_min = torch.from_numpy(stored_parameters[0, 1])
+        valid_y_max = torch.from_numpy(stored_parameters[1, 1])
+        batch_y = (batch_y * (valid_y_max - valid_y_min)) + valid_y_min
+        batch_y_hat = (batch_y_hat * (valid_y_max - valid_y_min)) + valid_y_min
+        
+        # Storing all temperature-valued truths and predictions for
+        # one root mean squared error calculation to get error in
+        # terms of temperature
+        if count == 0:
+            cpu_y_temps = batch_y
+            cpu_y_hat_temps = batch_y_hat
+        else:
+            cpu_y_temps = torch.cat([cpu_y_temps, batch_y], dim = 0)
+            cpu_y_hat_temps = torch.cat([cpu_y_hat_temps, batch_y_hat], dim = 0)
+        count = count + 1
+	# calculate and store the loss
+	valid_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
+    valid_set_loss = torch.sqrt(valid_set_loss)
+    valid_set_loss = valid_set_loss.item()
 
 
-# Converting loss values into array and saving
-valid_loss_array = np.asarray(valid_loss_list)
-np.save('outputs/final_valid_loss.npy', valid_loss_array)
-# The point of the above array is to sum for the whole-batch validation loss
+# Saving the validation set loss
+np.save('outputs/final_valid_loss.npy', np.asarray(valid_set_loss))
 
 
 # Generate validation predictions

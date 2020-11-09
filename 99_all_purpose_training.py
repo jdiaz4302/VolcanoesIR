@@ -289,7 +289,7 @@ for i in range(epochs):
 		batch_y = batch_y.to(device)
 		
 		# Run the model, determining forward pass based on model selected
-		if model_selection in ['LSTM', 'ConvLSTM']
+		if model_selection in ['LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
 		elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_t)

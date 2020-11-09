@@ -49,29 +49,6 @@
 # in 4 GPUs with 11 GB of RAM each
 
 
-# Gathering function inputs
-model_selection = input("Which model do you select?")
-assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
-training_data_set = input("Which set of training data do you want to use?")
-
-
-# Basic data import, step 0
-print("Importing and formatting data")
-volcanoes = os.listdir("data")
-assert((training_data_set in volcanoes) or (training_data_set == "all"))
-
-
-# Training parameters
-# This needs to actually be variable, will do with later exploration
-batch_size_dict = {'LSTM':4, 'Time-LSTM':4, 'Time-Aware LSTM':4, 'ConvLSTM':4, 'ConvTimeLSTM':4, 'ConvTimeAwareLSTM':4}
-print("W A R N I N G: Further exploratory work needded for variable batch size")
-lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
-batch_size = batch_size_dict[model_selection]
-num_input_scenes = lag_dict[training_data_set]
-train_percent = 0.70
-out_samp_perc = 0.15
-
-
 # Libraries and imports
 import os
 import numpy as np
@@ -93,6 +70,29 @@ elif model_selection == 'ConvTimeLSTM':
 	from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
+
+
+# Gathering function inputs
+model_selection = input("Which model do you select?")
+assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+training_data_set = input("Which set of training data do you want to use?")
+
+
+# Basic data import, step 0
+print("Importing and formatting data")
+volcanoes = os.listdir("data")
+assert((training_data_set in volcanoes) or (training_data_set == "all"))
+
+
+# Training parameters
+# This needs to actually be variable, will do with later exploration
+batch_size_dict = {'LSTM':4, 'Time-LSTM':4, 'Time-Aware LSTM':4, 'ConvLSTM':4, 'ConvTimeLSTM':4, 'ConvTimeAwareLSTM':4}
+print("W A R N I N G: Further exploratory work needded for variable batch size")
+lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
+batch_size = batch_size_dict[model_selection]
+num_input_scenes = lag_dict[training_data_set]
+train_percent = 0.70
+out_samp_perc = 0.15
 
 
 # Removing possible directory clutter

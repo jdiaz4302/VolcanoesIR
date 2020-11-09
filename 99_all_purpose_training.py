@@ -370,7 +370,7 @@ with torch.no_grad():
 		batch_y = batch_y.to(device)
 		
 		# Run the model, determining forward pass based on model selected
-		if model_selection in ['LSTM', 'ConvLSTM']
+		if model_selection in ['LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
 		elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_t)
@@ -506,7 +506,7 @@ with torch.no_grad():
 		if model_selection not in ['LSTM', 'ConvLSTM']:
 			batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
-		if model_selection in ['LSTM', 'ConvLSTM']
+		if model_selection in ['LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
 		elif model_selection in ['Time-LSTM', 'Time-Aware LSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_t)

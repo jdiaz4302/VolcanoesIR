@@ -230,7 +230,7 @@ print("Setting up methods")
 channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
-lstm_model = LSTM_Model(input_dim=channels,hidden_dim=[128,64,64,channels],GPU=True,input_size=(height,width))
+lstm_model = LSTM_Model(input_dim=channels,hidden_dim=[128,64,64,channels],GPU=True,input_size=(height,width),num_layers=4)
 
 
 # Passing to GPU

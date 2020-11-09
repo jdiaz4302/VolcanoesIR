@@ -173,7 +173,7 @@ for vol in volcanoes:
 			dates_i = formatted_dates[(i - num_input_scenes):i]
 			for j in range(len(dates_i_plus_1)):
 				time_differences_test[i - train_n - out_n - num_input_scenes, j] = (dates_i_plus_1[j] - dates_i[j]).days
-	if ((vol == "all") and (count == 0)) or (vol == training_data_set):
+	if ((vol == "all") and (count == 0)) or (vol != "all"):
 		x_train = x_scenes_train
 		t_train = time_differences_train
 		y_train = y_scenes_train

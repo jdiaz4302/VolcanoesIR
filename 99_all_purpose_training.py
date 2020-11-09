@@ -49,6 +49,12 @@
 # in 4 GPUs with 11 GB of RAM each
 
 
+# Gathering function inputs
+model_selection = input("Which model do you select?")
+assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+training_data_set = input("Which set of training data do you want to use?")
+
+
 # Libraries and imports
 import os
 import numpy as np
@@ -70,12 +76,6 @@ elif model_selection == 'ConvTimeLSTM':
 	from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
-
-
-# Gathering function inputs
-model_selection = input("Which model do you select?")
-assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
-training_data_set = input("Which set of training data do you want to use?")
 
 
 # Basic data import, step 0

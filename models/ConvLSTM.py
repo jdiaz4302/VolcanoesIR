@@ -75,14 +75,17 @@ class ConvLSTM(nn.Module):
         self._check_kernel_size_consistency(kernel_size)
 
         # Make sure that both `kernel_size` and `hidden_dim` are lists having len == num_layers
-        num_layer
         hidden_dim  = self._extend_for_multilayer(hidden_dim, num_layers)
         kernel_size = self._extend_for_multilayer(kernel_size, num_layers)
+        if not len(kernel_size) == len(hidden_dim) == num_layers:
+            raise ValueError('Inconsistent list length.')
 
         self.height, self.width = input_size
 
         self.input_dim  = input_dim
+        self.hidden_dim = hidden_dim
         self.kernel_size = kernel_size
+        self.num_layers = num_layers
         self.batch_first = batch_first
         self.bias = bias
         self.return_all_layers = return_all_layers

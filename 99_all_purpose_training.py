@@ -136,7 +136,7 @@ for vol in volcanoes:
 	# Formatting the string dates as datetime objects
 	formatted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in tabular_metadata['dates']]
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
-	for i in range(num_input_scenes, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + 10):
+	for i in range(num_input_scenes, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
 			x_scenes_train[i - num_input_scenes, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]

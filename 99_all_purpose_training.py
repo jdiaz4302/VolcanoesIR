@@ -86,7 +86,7 @@ assert((training_data_set in volcanoes) or (training_data_set == "all"))
 
 # Training parameters
 # This needs to actually be variable, will do with later exploration
-batch_size_dict = {'LSTM':4, 'Time-LSTM':4, 'Time-Aware LSTM':4, 'ConvLSTM':4, 'ConvTimeLSTM':4, 'ConvTimeAwareLSTM':4}
+batch_size_dict = {'LSTM':4, 'TimeLSTM':4, 'Time-Aware LSTM':4, 'ConvLSTM':4, 'ConvTimeLSTM':4, 'ConvTimeAwareLSTM':4}
 print("W A R N I N G: Further exploratory work needded for variable batch size")
 lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
 batch_size = batch_size_dict[model_selection]

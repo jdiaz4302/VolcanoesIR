@@ -51,7 +51,7 @@
 
 # Gathering function inputs
 model_selection = input("Which model do you select?")
-assert(model_selection in ['LSTM', 'Time-LSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+assert(model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
 training_data_set = input("Which set of training data do you want to use?")
 
 

@@ -10,21 +10,21 @@ class Dim(IntEnum):
 
 # Building the base TimeLSTM class
 class TimeLSTM(nn.Module):
-    def __init__(self, input_dim, hidden_sz, GPU):
+    def __init__(self, input_dim, hidden_dim, GPU):
         super().__init__()
         self.input_dim = input_dim
-        self.hidden_size = hidden_sz
+        self.hidden_size = hidden_dim
         self.GPU = GPU
         # Factor of 5 (not 4) because input and forget are but there are two Ts
-        self.weights_x = nn.Parameter(torch.randn(input_dim, hidden_sz * 5))
+        self.weights_x = nn.Parameter(torch.randn(input_dim, hidden_dim * 5))
         # Factor of 3 because forget gate was lost
-        self.weights_h = nn.Parameter(torch.randn(hidden_sz, hidden_sz * 3))
+        self.weights_h = nn.Parameter(torch.randn(hidden_dim, hidden_dim * 3))
         # Additionally, time differences are used in T1...
-        self.weights_t1 = nn.Parameter(torch.randn(1, hidden_sz))
+        self.weights_t1 = nn.Parameter(torch.randn(1, hidden_dim))
         # And, separately (due to constraints): T2 and output
-        self.weights_t = nn.Parameter(torch.randn(1, hidden_sz * 2))
+        self.weights_t = nn.Parameter(torch.randn(1, hidden_dim * 2))
         # Adapted for i, t1, t2, c, and o
-        self.bias = nn.Parameter(torch.randn(hidden_sz * 5))
+        self.bias = nn.Parameter(torch.randn(hidden_dim * 5))
         self.init_weights()
     
     def init_weights(self):

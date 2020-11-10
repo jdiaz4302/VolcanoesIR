@@ -53,6 +53,12 @@
 model_selection = input("Which model do you select?")
 assert(model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
 training_data_set = input("Which set of training data do you want to use?")
+n_layers = int(input("Enter number of layers: ")) 
+hidden_dim_ls = []
+# iterating till the range 
+for i in range(n_layers): 
+    layer_dim = int(input()) 
+    hidden_dim_ls.append(layer_dim)
 
 
 # Libraries and imports
@@ -65,7 +71,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 from torch.utils import data
 if model_selection == 'LSTM':
-	from models.LSTM import 
+	from models.LSTM import LSTM as LSTM_Model
 elif model_selection == 'TimeLSTM':
 	from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
 elif model_selection == 'Time-Aware LSTM':
@@ -230,7 +236,7 @@ print("Setting up methods")
 channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
-lstm_model = LSTM_Model(input_dim=channels,hidden_dim=[128,64,64,channels],GPU=True,input_size=(height,width),num_layers=4)
+lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=4)
 
 
 # Passing to GPU

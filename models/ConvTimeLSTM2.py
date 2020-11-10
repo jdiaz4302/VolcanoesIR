@@ -179,15 +179,15 @@ class ConvTime_LSTM2Cell(nn.Module):
 
 class ConvTime_LSTM2(nn.Module):
 
-    def __init__(self, input_size, input_dim, hidden_dim, kernel_size, num_layers,
-                 batch_first, bias, return_all_layers, GPU):
+    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(5,5),
+                 batch_first=True, bias=True, return_all_layers=False):
         super(ConvTime_LSTM2, self).__init__()
 
         self._check_kernel_size_consistency(kernel_size)
 
         # Make sure that both `kernel_size` and `hidden_dim` are lists having len == num_layers
-        kernel_size = self._extend_for_multilayer(kernel_size, num_layers)
         hidden_dim  = self._extend_for_multilayer(hidden_dim, num_layers)
+        kernel_size = self._extend_for_multilayer(kernel_size, num_layers)
         if not len(kernel_size) == len(hidden_dim) == num_layers:
             raise ValueError('Inconsistent list length.')
 

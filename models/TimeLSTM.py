@@ -10,13 +10,13 @@ class Dim(IntEnum):
 
 # Building the base TimeLSTM class
 class TimeLSTM(nn.Module):
-    def __init__(self, input_sz, hidden_sz, GPU):
+    def __init__(self, input_dim, hidden_sz, GPU):
         super().__init__()
-        self.input_sz = input_sz
+        self.input_dim = input_dim
         self.hidden_size = hidden_sz
         self.GPU = GPU
         # Factor of 5 (not 4) because input and forget are but there are two Ts
-        self.weights_x = nn.Parameter(torch.randn(input_sz, hidden_sz * 5))
+        self.weights_x = nn.Parameter(torch.randn(input_dim, hidden_sz * 5))
         # Factor of 3 because forget gate was lost
         self.weights_h = nn.Parameter(torch.randn(hidden_sz, hidden_sz * 3))
         # Additionally, time differences are used in T1...
@@ -88,18 +88,20 @@ class TimeLSTM(nn.Module):
 
 # Stacking the base TimeLSTM class 4 times for a deeper network
 class StackedTimeLSTM(torch.nn.Module):
-    def __init__(self, input_sz, layer_sizes, GPU):
+    def __init__(self, input_dim, hidden_dim, GPU, input_size=False, num_layers=False):
         """Simply stacking the simple TimeLSTM for multilayer model"""
         super(StackedTimeLSTM, self).__init__()
-        self.input_sz = input_sz
-        self.layer_sizes = layer_sizes
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
         self.GPU = GPU
+        self.input_size = input_size # image h and w, relic from/for spatial models
+        self.num_layers = num_layers # also relic
         # Wanting more/less than 4 layers will require manual editting
-        assert(len(self.layer_sizes) == 4)
-        self.layer1 = TimeLSTM(input_sz, self.layer_sizes[0], self.GPU)
-        self.layer2 = TimeLSTM(self.layer_sizes[0], self.layer_sizes[1], self.GPU)
-        self.layer3 = TimeLSTM(self.layer_sizes[1], self.layer_sizes[2], self.GPU)
-        self.layer4 = TimeLSTM(self.layer_sizes[2], self.layer_sizes[3], self.GPU)
+        assert(len(self.hidden_dim) == 4)
+        self.layer1 = TimeLSTM(input_dim, self.hidden_dim[0], self.GPU)
+        self.layer2 = TimeLSTM(self.hidden_dim[0], self.hidden_dim[1], self.GPU)
+        self.layer3 = TimeLSTM(self.hidden_dim[1], self.hidden_dim[2], self.GPU)
+        self.layer4 = TimeLSTM(self.hidden_dim[2], self.hidden_dim[3], self.GPU)
 
     def forward(self, x, t):
         h1, _ = self.layer1(x, t)

@@ -10,13 +10,16 @@ class Dim(IntEnum):
 
 # Simple LSTM made from scratch
 class OptimizedLSTM(nn.Module):
-    def __init__(self, input_sz: int, hidden_sz: int):
+    def __init__(self, input_dim: int, hidden_dim: int, GPU, input_size=False, num_layers=False):
         super().__init__()
-        self.input_sz = input_sz
-        self.hidden_size = hidden_sz
-        self.weight_ih = nn.Parameter(torch.Tensor(input_sz, hidden_sz * 4))
-        self.weight_hh = nn.Parameter(torch.Tensor(hidden_sz, hidden_sz * 4))
-        self.bias = nn.Parameter(torch.Tensor(hidden_sz * 4))
+        self.input_dim = input_dim
+        self.hidden_size = hidden_dim
+        self.GPU = GPU
+        self.input_size = input_size # image h and w, relic from/for spatial models
+        self.num_layers = num_layers # also relic
+        self.weight_ih = nn.Parameter(torch.Tensor(input_dim, hidden_dim * 4))
+        self.weight_hh = nn.Parameter(torch.Tensor(hidden_dim, hidden_dim * 4))
+        self.bias = nn.Parameter(torch.Tensor(hidden_dim * 4))
         self.init_weights()
     
     def init_weights(self):
@@ -35,6 +38,8 @@ class OptimizedLSTM(nn.Module):
                         torch.zeros(self.hidden_size).to(x.device))
         else:
             h_t, c_t = init_states
+        if self.GPU:
+            h_t, c_t = (h_t.cuda(), c_t.cuda())
         
         HS = self.hidden_size
         for t in range(seq_sz):

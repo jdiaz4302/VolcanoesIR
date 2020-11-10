@@ -10,17 +10,17 @@ class Dim(IntEnum):
 
 # Building the base TimeAwareLSTM class
 class TimeAwareLSTM(nn.Module):
-    def __init__(self, input_sz: int, hidden_sz: int, GPU):
+    def __init__(self, input_dim: int, hidden_dim: int, GPU):
         super().__init__()
-        self.input_sz = input_sz
-        self.hidden_size = hidden_sz
+        self.input_dim = input_dim
+        self.hidden_size = hidden_dim
         self.GPU = GPU
-        self.weights_x = nn.Parameter(torch.Tensor(input_sz, hidden_sz * 4))
-        self.weights_h = nn.Parameter(torch.Tensor(hidden_sz, hidden_sz * 4))
+        self.weights_x = nn.Parameter(torch.Tensor(input_dim, hidden_dim * 4))
+        self.weights_h = nn.Parameter(torch.Tensor(hidden_dim, hidden_dim * 4))
         # Additionally, weights for adjusting memory by time differences
-        self.weights_t = nn.Parameter(torch.Tensor(hidden_sz, hidden_sz))
+        self.weights_t = nn.Parameter(torch.Tensor(hidden_dim, hidden_dim))
         # Adapted for i, f, o, c and c-new/adjusted
-        self.bias = nn.Parameter(torch.Tensor(hidden_sz * 5))
+        self.bias = nn.Parameter(torch.Tensor(hidden_dim * 5))
         self.init_weights()
     
     def init_weights(self):
@@ -82,18 +82,20 @@ class TimeAwareLSTM(nn.Module):
 
 # Stacking the base TimeAwareLSTM class 4 times for a deeper network
 class StackedTimeAwareLSTM(torch.nn.Module):
-    def __init__(self, input_sz, layer_sizes, GPU):
+    def __init__(self, input_dim, hidden_dim, GPU, input_size=False, num_layers=False):
         """Simply stacking the simple TimeLSTM for multilayer model"""
         super(StackedTimeAwareLSTM, self).__init__()
-        self.input_sz = input_sz
-        self.layer_sizes = layer_sizes
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
         self.GPU = GPU
+        self.input_size = input_size # image h and w, relic from/for spatial models
+        self.num_layers = num_layers # also relic
         # Wanting more/less than 4 layers will require manual editting
-        assert(len(self.layer_sizes) == 4)
-        self.layer1 = TimeAwareLSTM(input_sz, self.layer_sizes[0], self.GPU)
-        self.layer2 = TimeAwareLSTM(self.layer_sizes[0], self.layer_sizes[1], self.GPU)
-        self.layer3 = TimeAwareLSTM(self.layer_sizes[1], self.layer_sizes[2], self.GPU)
-        self.layer4 = TimeAwareLSTM(self.layer_sizes[2], self.layer_sizes[3], self.GPU)
+        assert(len(self.hidden_dim) == 4)
+        self.layer1 = TimeAwareLSTM(input_dim, self.hidden_dim[0], self.GPU)
+        self.layer2 = TimeAwareLSTM(self.hidden_dim[0], self.hidden_dim[1], self.GPU)
+        self.layer3 = TimeAwareLSTM(self.hidden_dim[1], self.hidden_dim[2], self.GPU)
+        self.layer4 = TimeAwareLSTM(self.hidden_dim[2], self.hidden_dim[3], self.GPU)
 
     def forward(self, x, t):
         h1, _ = self.layer1(x, t)

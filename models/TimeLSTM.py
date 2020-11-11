@@ -1,3 +1,7 @@
+x_and_t_channels_fragile = 5
+
+# Adapted from: https://github.com/keitakurita/Practical_NLP_in_PyTorch/blob/master/deep_dives/lstm_from_scratch.ipynb
+import torch
 import torch.nn as nn
 from enum import IntEnum
 

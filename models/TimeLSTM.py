@@ -1,7 +1,3 @@
-x_and_t_channels_fragile = 5
-
-# Adapted from: https://github.com/keitakurita/Practical_NLP_in_PyTorch/blob/master/deep_dives/lstm_from_scratch.ipynb
-import torch
 import torch.nn as nn
 from enum import IntEnum
 
@@ -52,9 +48,7 @@ class TimeLSTM(nn.Module):
         
         HS = self.hidden_size
         for t in range(seq_sz):
-            print(x_for_h.shape)
             x_t = x_for_h[:, t, :]
-            print('\t', x_t.shape)
             TimeDiff_t = TimeDiff[:, t, :]
             # batch the computations into a single matrix multiplication
             # And apply all TimeLSTM equations
@@ -123,7 +117,6 @@ class StackedTimeLSTM(torch.nn.Module):
 
         for layer_idx in range(self.num_layers):
             output_inner = []
-            print(layer_idx)
             for k in range(seq_len):
                 if k == 0 and layer_idx == 0:
                     h, c = self.cell_list[layer_idx](x_for_h[:, [k], :],
@@ -148,7 +141,6 @@ class StackedTimeLSTM(torch.nn.Module):
             layer_output = torch.stack(output_inner, dim=1)
             layer_output.shape
             x_for_h = layer_output
-            print('\t\t', x_for_h.shape)
 
             layer_output_list.append(layer_output)
             last_state_list.append([h, c])

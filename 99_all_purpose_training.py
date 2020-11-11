@@ -283,9 +283,10 @@ for i in range(epochs):
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
 			t_sh = batch_t.shape
 			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-			# This next line is fragile to the assumption that
-			# bands have the same sampling time difference
-			batch_t = batch_t[:,:,0:1]
+			if model_selection == 'Time-Aware LSTM':
+				# This next line is fragile to the assumption that
+				# bands have the same sampling time difference
+				batch_t = batch_t[:,:,0:1]
 		
 		# move to GPU
 		batch_x = batch_x.to(device)

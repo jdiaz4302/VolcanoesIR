@@ -30,13 +30,13 @@ class TimeAwareLSTM(nn.Module):
             else:
                 nn.init.zeros_(p.data)
         
-    def forward(self, x, TimeDiff, init_states=None):
+    def forward(self, x_for_h, x_for_x, TimeDiff, init_states=None):
         """Assumes x is of shape (batch, sequence, feature)"""
         bs, seq_sz, _ = x.size()
         hidden_seq = []
         if init_states is None:
-            h_t, c_t = (torch.zeros(self.hidden_size).to(x.device), 
-                        torch.zeros(self.hidden_size).to(x.device))
+            h_t, c_t = (torch.zeros(bs, self.hidden_size).to(x.device), 
+                        torch.zeros(bs, self.hidden_size).to(x.device))
         else:
             h_t, c_t = init_states
         if self.GPU:
@@ -50,8 +50,10 @@ class TimeAwareLSTM(nn.Module):
             # And apply all TimeAwareLSTM equations
             # Adjusting previous memory
             # Short term memory
+            print(c_t.shape)
             c_s_t_minus_1 = torch.tanh(c_t @ self.weights_t + self.bias[:HS])
             # Discounted short term memory, scalar assumption for TimeDiff
+            print(c_s_t_minus_1.shape, TimeDiff_t.shape)
             c_hat_s_t_minus_1 = c_s_t_minus_1 * (-1 * torch.tanh(TimeDiff_t))
             # Long-term memory
             c_t_t_minus_1 = c_t - c_s_t_minus_1
@@ -91,15 +93,52 @@ class StackedTimeAwareLSTM(torch.nn.Module):
         self.input_size = input_size # image h and w, relic from/for spatial models
         self.num_layers = num_layers # also relic
         # Wanting more/less than 4 layers will require manual editting
-        assert(len(self.hidden_dim) == 4)
-        self.layer1 = TimeAwareLSTM(input_dim, self.hidden_dim[0], self.GPU)
-        self.layer2 = TimeAwareLSTM(self.hidden_dim[0], self.hidden_dim[1], self.GPU)
-        self.layer3 = TimeAwareLSTM(self.hidden_dim[1], self.hidden_dim[2], self.GPU)
-        self.layer4 = TimeAwareLSTM(self.hidden_dim[2], self.hidden_dim[3], self.GPU)
+        
+        cell_list = []
+        for i in range(0, self.num_layers):
+            cur_input_dim = self.input_dim if i == 0 else self.hidden_dim[i-1]
+
+            cell_list.append(TimeAwareLSTM(input_dim=cur_input_dim,
+                                           hidden_dim=self.hidden_dim[i],
+                                           GPU=self.GPU))
+
+        self.cell_list = nn.ModuleList(cell_list)
 
     def forward(self, x, t):
-        h1, _ = self.layer1(x, t)
-        h2, _ = self.layer2(h1, t)
-        h3, _ = self.layer3(h2, t)
-        o, _ = self.layer4(h3, t)
-        return o, _
+
+        layer_output_list = []
+        last_state_list   = []
+
+        seq_len = x.size(1)
+
+        for layer_idx in range(self.num_layers):
+            output_inner = []
+            print(layer_idx)
+            for k in range(seq_len):
+                if k == 0 and layer_idx == 0:
+                    h, c = self.cell_list[layer_idx](x[:, [k], :],
+                                                     t[:, [k], :])
+                elif k == 0 and layer_idx != 0:
+                    h, c = self.cell_list[layer_idx](x[:, k, :],
+                                                     t[:, [k], :])
+                # If not the first ele. in seq., use hidden state
+                elif k != 0 and layer_idx != 0:
+                    h, c = self.cell_list[layer_idx](x[:, k, :],
+                                                     t[:, [k], :],
+                                                     init_states=[c[0],c[1]])
+                elif k != 0 and layer_idx == 0:
+                    h, c = self.cell_list[layer_idx](x[:, [k], :],
+                                                     t[:, [k], :],
+                                                     init_states=[c[0],c[1]])
+                output_inner.append(h)
+            layer_output = torch.stack(output_inner, dim=1)
+            layer_output.shape
+            x = layer_output
+
+            layer_output_list.append(layer_output)
+            last_state_list.append([h, c])
+
+        layer_output_list = layer_output_list[-1:]
+        last_state_list   = last_state_list[-1:]
+
+        return layer_output_list, last_state_list

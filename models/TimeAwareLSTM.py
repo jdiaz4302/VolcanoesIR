@@ -30,7 +30,7 @@ class TimeAwareLSTM(nn.Module):
             else:
                 nn.init.zeros_(p.data)
         
-    def forward(self, x_for_h, x_for_x, TimeDiff, init_states=None):
+    def forward(self, x, TimeDiff, init_states=None):
         """Assumes x is of shape (batch, sequence, feature)"""
         bs, seq_sz, _ = x.size()
         hidden_seq = []

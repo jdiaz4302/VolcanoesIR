@@ -57,8 +57,8 @@ n_layers = int(input("Enter number of layers: "))
 hidden_dim_ls = []
 # iterating till the range 
 for i in range(n_layers): 
-    layer_dim = int(input()) 
-    hidden_dim_ls.append(layer_dim)
+	layer_dim = int(input()) 
+	hidden_dim_ls.append(layer_dim)
 
 
 # Libraries and imports
@@ -303,11 +303,13 @@ for i in range(epochs):
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['LSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat[0]
 			batch_y_hat = batch_y_hat.view(x_sh)
 		else:
 			batch_y_hat = batch_y_hat[0][0]
+		if model_selection == 'TimeLSTM':
+			batch_y_hat = batch_y_hat.view(x_sh)
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
 		
 		# calculate and store the loss

@@ -300,6 +300,7 @@ for i in range(epochs):
 		elif model_selection == 'Time-Aware LSTM':
 			batch_y_hat = lstm_model(batch_x, batch_t)
 		elif model_selection == ['TimeLSTM', 'ConvTimeLSTM']:
+            print(batch_x.shape, batch_t.shape)
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output

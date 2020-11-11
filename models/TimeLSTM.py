@@ -24,9 +24,9 @@ class TimeLSTM(nn.Module):
         # Factor of 3 because forget gate was lost
         self.weights_h = nn.Parameter(torch.randn(hidden_dim, hidden_dim * 3))
         # Additionally, time differences are used in T1...
-        self.weights_t1 = nn.Parameter(torch.randn(x_and_t_channels_fragile, hidden_dim))
+        self.weights_t1 = nn.Parameter(torch.randn(1, hidden_dim))
         # And, separately (due to constraints): T2 and output
-        self.weights_t = nn.Parameter(torch.randn(x_and_t_channels_fragile, hidden_dim * 2))
+        self.weights_t = nn.Parameter(torch.randn(1, hidden_dim * 2))
         # Adapted for i, t1, t2, c, and o
         self.bias = nn.Parameter(torch.randn(hidden_dim * 5))
         self.init_weights()

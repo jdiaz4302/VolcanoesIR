@@ -50,10 +50,8 @@ class TimeAwareLSTM(nn.Module):
             # And apply all TimeAwareLSTM equations
             # Adjusting previous memory
             # Short term memory
-            print(c_t.shape)
             c_s_t_minus_1 = torch.tanh(c_t @ self.weights_t + self.bias[:HS])
             # Discounted short term memory, scalar assumption for TimeDiff
-            print(c_s_t_minus_1.shape, TimeDiff_t.shape)
             c_hat_s_t_minus_1 = c_s_t_minus_1 * (-1 * torch.tanh(TimeDiff_t))
             # Long-term memory
             c_t_t_minus_1 = c_t - c_s_t_minus_1
@@ -113,7 +111,6 @@ class StackedTimeAwareLSTM(torch.nn.Module):
 
         for layer_idx in range(self.num_layers):
             output_inner = []
-            print(layer_idx)
             for k in range(seq_len):
                 if k == 0 and layer_idx == 0:
                     h, c = self.cell_list[layer_idx](x[:, [k], :],

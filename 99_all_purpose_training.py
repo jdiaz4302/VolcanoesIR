@@ -71,7 +71,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 from torch.utils import data
 if model_selection == 'LSTM':
-	from models.LSTM import LSTM as LSTM_Model
+	from models.LSTM import StackedLSTM as LSTM_Model
 elif model_selection == 'TimeLSTM':
 	from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
 elif model_selection == 'Time-Aware LSTM':

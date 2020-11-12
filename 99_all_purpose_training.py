@@ -368,7 +368,7 @@ with torch.no_grad():
 			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
-			batch_t = batch_t[:,:,0:1]
+			batch_t = batch_t[:,:,[0]]
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
@@ -380,17 +380,15 @@ with torch.no_grad():
 		# Run the model, determining forward pass based on model selected
 		if model_selection in ['LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
-		elif model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
+		elif model_selection == 'Time-Aware LSTM':
 			batch_y_hat = lstm_model(batch_x, batch_t)
-		elif model_selection == 'ConvTimeLSTM':
+		elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
+		batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = batch_y_hat[0]
 			batch_y_hat = batch_y_hat.view(x_sh)
-		else:
-			batch_y_hat = batch_y_hat[0][0]
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
 		
 		# Moving data off GPU now that model has ran
@@ -443,7 +441,7 @@ with torch.no_grad():
 			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
-			batch_t = batch_t[:,:,0:1]
+			batch_t = batch_t[:,:,[0]]
 		
 		# move to GPU
 		batch_x = batch_x.to(device)
@@ -455,17 +453,15 @@ with torch.no_grad():
 		# Run the model, determining forward pass based on model selected
 		if model_selection in ['LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
-		elif model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
+		elif model_selection == 'Time-Aware LSTM':
 			batch_y_hat = lstm_model(batch_x, batch_t)
-		elif model_selection == 'ConvTimeLSTM':
+		elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
+		batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = batch_y_hat[0]
 			batch_y_hat = batch_y_hat.view(x_sh)
-		else:
-			batch_y_hat = batch_y_hat[0][0]
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
 		
 		# Moving data off GPU now that model has ran

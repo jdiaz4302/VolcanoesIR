@@ -84,6 +84,10 @@ from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 
 
+# Setting seed for reproducibility
+torch.manual_seed(0)
+
+
 # Basic data import, step 0
 print("Importing and formatting data")
 volcanoes = os.listdir("data")
@@ -264,7 +268,7 @@ lstm_model = torch.nn.DataParallel(lstm_model)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 2
+epochs = 25
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()

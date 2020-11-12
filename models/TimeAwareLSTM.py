@@ -80,7 +80,7 @@ class TimeAwareLSTM(nn.Module):
         return hidden_seq, (h_t, c_t)
 
 
-# Stacking the base TimeAwareLSTM class 4 times for a deeper network
+# Stacking the base TimeAwareLSTM class for a deeper network
 class StackedTimeAwareLSTM(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, GPU, input_size=False, num_layers=False):
         """Simply stacking the simple TimeLSTM for multilayer model"""

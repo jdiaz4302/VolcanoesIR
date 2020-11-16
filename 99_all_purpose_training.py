@@ -429,8 +429,8 @@ with torch.no_grad():
 	train_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
 	train_set_loss = torch.sqrt(train_set_loss)
 	train_set_loss = train_set_loss.item()
-    # Saving the predictions and corresponding truths
-    np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
+	# Saving the predictions and corresponding truths
+	np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/train_truth.npy", cpu_y_temps.numpy())
 
 
@@ -505,8 +505,8 @@ with torch.no_grad():
 	valid_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
 	valid_set_loss = torch.sqrt(valid_set_loss)
 	valid_set_loss = valid_set_loss.item()
-    # Saving the predictions and corresponding truths
-    np.save("outputs/valid_prediction.npy", cpu_y_hat_temps.numpy())
+	# Saving the predictions and corresponding truths
+	np.save("outputs/valid_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/valid_truth.npy", cpu_y_temps.numpy())
 
 

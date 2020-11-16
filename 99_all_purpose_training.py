@@ -483,8 +483,8 @@ with torch.no_grad():
 		batch_y_hat = batch_y_hat.cpu()
 		
 		# Transformating the data to temperature values
-		valid_y_min = torch.from_numpy(stored_parameters[0, 1])
-		valid_y_max = torch.from_numpy(stored_parameters[1, 1])
+		valid_y_min = torch.tensor(stored_parameters[0, 1])
+		valid_y_max = torch.tensor(stored_parameters[1, 1])
 		batch_y = (batch_y * (valid_y_max - valid_y_min)) + valid_y_min
 		batch_y_hat = (batch_y_hat * (valid_y_max - valid_y_min)) + valid_y_min
 		

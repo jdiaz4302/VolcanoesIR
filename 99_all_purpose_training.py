@@ -259,7 +259,7 @@ optimizer = torch.optim.Adam(lstm_model.parameters())
 if training_data_set == 'all':
 	training_set = efficient_Dataset(data_indices=range(y_train.shape[0]), x = x_train, t=t_train, y = y_train)
 else:
-    print('Imported all data, but only using training data for', training_data_set)
+	print('Imported all data, but only using training data for', training_data_set)
 	vol_ID = vol_name_ls.index(training_data_set)
 	index_max = vol_cutoff_indices[vol_ID]
 	if vol_ID == 0:

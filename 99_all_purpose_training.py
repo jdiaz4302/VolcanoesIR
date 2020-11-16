@@ -185,7 +185,7 @@ for vol in volcanoes:
 			dates_i = formatted_dates[(i - num_input_scenes):i]
 			for j in range(len(dates_i_plus_1)):
 				time_differences_test[i - train_n - out_n - num_input_scenes, j] = (dates_i_plus_1[j] - dates_i[j]).days
-	if ((training_data_set == "all") and (count == 0)) or (training_data_set != "all"):
+	if count == 0:
 		x_train = x_scenes_train
 		t_train = time_differences_train
 		y_train = y_scenes_train
@@ -257,7 +257,17 @@ optimizer = torch.optim.Adam(lstm_model.parameters())
 
 
 # Defining data sets and loaders for parallelization option
-training_set = efficient_Dataset(data_indices=range(y_train.shape[0]), x = x_train, t=t_train, y = y_train)
+if training_data_set == 'all':
+	training_set = efficient_Dataset(data_indices=range(y_train.shape[0]), x = x_train, t=t_train, y = y_train)
+else:
+	vol_ID = vol_name_ls.index(training_data_set)
+	index_max = vol_cutoff_indices[vol_ID]
+	if vol_ID == 0:
+		index_min = 0
+	else:
+		index_min = vol_cutoff_indices[vol_ID - 1]
+	curr_data_indices = range(index_min, index_max)
+	training_set = efficient_Dataset(data_indices=curr_data_indices, x = x_train, t=t_train, y = y_train)
 validation_set = efficient_Dataset(data_indices=range(y_valid.shape[0]), x = x_valid, t = t_valid, y = y_valid)
 train_loader = torch.utils.data.DataLoader(dataset = training_set, batch_size = batch_size, shuffle = True)
 validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_size = batch_size, shuffle = True)

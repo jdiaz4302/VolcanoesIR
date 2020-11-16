@@ -112,8 +112,9 @@ except ValueError as e:
 	do = 'nothing'
 
 count = 0
+vol_cutoff_indices = []
+vol_name_ls = []
 for vol in volcanoes:
-	print(count)
 	### Basic data import ###
 	numpy_data_location = "data/" + vol + "/numpy_data_cube.npy"
 	table_data_location = "data/" + vol + "/good_df.csv"
@@ -184,7 +185,6 @@ for vol in volcanoes:
 			dates_i = formatted_dates[(i - num_input_scenes):i]
 			for j in range(len(dates_i_plus_1)):
 				time_differences_test[i - train_n - out_n - num_input_scenes, j] = (dates_i_plus_1[j] - dates_i[j]).days
-	print(vol, count)
 	if ((training_data_set == "all") and (count == 0)) or (training_data_set != "all"):
 		x_train = x_scenes_train
 		t_train = time_differences_train
@@ -206,7 +206,8 @@ for vol in volcanoes:
 		t_test = np.append(t_test, time_differences_test, axis = 0)
 		y_test = np.append(y_test, y_scenes_train, axis = 0)
 	count += 1
-	print(y_train.shape)
+	vol_cutoff_indices.append(y_train.shape[0])
+	vol_name_ls.append(vol)
 	print('\t\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 
 

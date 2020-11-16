@@ -429,6 +429,9 @@ with torch.no_grad():
 	train_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
 	train_set_loss = torch.sqrt(train_set_loss)
 	train_set_loss = train_set_loss.item()
+    # Saving the predictions and corresponding truths
+    np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
+	np.save("outputs/train_truth.npy", cpu_y_temps.numpy())
 
 
 # Saving the training set loss
@@ -502,40 +505,10 @@ with torch.no_grad():
 	valid_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
 	valid_set_loss = torch.sqrt(valid_set_loss)
 	valid_set_loss = valid_set_loss.item()
+    # Saving the predictions and corresponding truths
+    np.save("outputs/valid_prediction.npy", cpu_y_hat_temps.numpy())
+	np.save("outputs/valid_truth.npy", cpu_y_temps.numpy())
 
 
 # Saving the validation set loss
 np.save('outputs/final_valid_loss.npy', np.asarray(valid_set_loss))
-
-
-# Generate some validation predictions
-with torch.no_grad():
-	for i in range(25):
-		batch_x, batch_t, batch_y = next(iter(validation_loader))
-		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			x_sh = batch_x.shape
-			batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-			y_sh = batch_y.shape
-		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
-			t_sh = batch_t.shape
-			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-			batch_t = batch_t[:,:,0:1]
-		batch_x = batch_x.to(device)
-		if model_selection not in ['LSTM', 'ConvLSTM']:
-			batch_t = batch_t.to(device)
-		batch_y = batch_y.to(device)
-		if model_selection in ['LSTM', 'ConvLSTM']:
-			batch_y_hat = lstm_model(batch_x)
-		elif model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = lstm_model(batch_x, batch_t)
-		elif model_selection == 'ConvTimeLSTM':
-			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
-		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = batch_y_hat[0]
-			batch_y_hat = batch_y_hat.view(x_sh)
-		else:
-			batch_y_hat = batch_y_hat[0][0]
-		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
-		batch_y_hat = batch_y_hat.cpu().data.numpy()
-		np.save("outputs/valid_prediction_" + str(i) + ".npy", batch_y_hat)
-		np.save("outputs/valid_truth_" + str(i) + ".npy", batch_y)

@@ -244,6 +244,10 @@ channels = x_train.shape[2]
 height = x_train.shape[3]
 width = x_train.shape[4]
 lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=4)
+# Print number of model parameters
+total_params = sum(p.numel() for p in lstm_model.parameters() if p.requires_grad)
+print('\nTotal number of model parameters:', total_params, '\n')
+
 
 
 # Passing to GPU
@@ -430,7 +434,7 @@ with torch.no_grad():
 	train_set_loss = torch.sqrt(train_set_loss)
 	train_set_loss = train_set_loss.item()
 	# print training set loss
-	print("Training set loss:", train_set_loss)
+	print("\nTraining set loss:", train_set_loss)
 	# Saving the predictions and corresponding truths
 	np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/train_truth.npy", cpu_y_temps.numpy())
@@ -508,7 +512,7 @@ with torch.no_grad():
 	valid_set_loss = torch.sqrt(valid_set_loss)
 	valid_set_loss = valid_set_loss.item()
 	# print validation set loss
-	print("Validation set loss:", valid_set_loss)
+	print("\nValidation set loss:", valid_set_loss)
 	# Saving the predictions and corresponding truths
 	np.save("outputs/valid_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/valid_truth.npy", cpu_y_temps.numpy())

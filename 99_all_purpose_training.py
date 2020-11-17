@@ -529,66 +529,68 @@ with torch.no_grad():
 
 
 # Determine validation set performance by volcano
-for i in range(len(y_train)):
-	batch_x = x_valid[[i], :, :, :, :]
-	batch_t = t_valid[[i], :, :, :, :]
-	batch_y = y_valid[[i], :, :, :, :]
-	
-	# reshaping data if needed for non-spatial LSTMs
-	if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-		x_sh = batch_x.shape
-		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-		# We wont reshape y, instead y_hat to fit y
-		y_sh = batch_y.shape
-	# Only further processing time in a time-conscious, non-spatial LSTM
-	if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
-		t_sh = batch_t.shape
-		batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
-		# This next line is fragile to the assumption that
-		# bands have the same sampling time difference
-		batch_t = batch_t[:,:,[0]]
+with torch.no_grad():
+	count = 0
+	for i in range(len(y_train)):
+		batch_x = x_valid[[i], :, :, :, :]
+		batch_t = t_valid[[i], :, :, :, :]
+		batch_y = y_valid[[i], :, :, :, :]
 		
-	# move to GPU
-	batch_x = batch_x.to(device)
-	# Only move time tensors to GPU if time-conscious LSTM
-	if model_selection not in ['LSTM', 'ConvLSTM']:
-		batch_t = batch_t.to(device)
-	batch_y = batch_y.to(device)
+		# reshaping data if needed for non-spatial LSTMs
+		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			x_sh = batch_x.shape
+			batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
+			# We wont reshape y, instead y_hat to fit y
+			y_sh = batch_y.shape
+		# Only further processing time in a time-conscious, non-spatial LSTM
+		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
+			t_sh = batch_t.shape
+			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+			# This next line is fragile to the assumption that
+			# bands have the same sampling time difference
+			batch_t = batch_t[:,:,[0]]
+			
+		# move to GPU
+		batch_x = batch_x.to(device)
+		# Only move time tensors to GPU if time-conscious LSTM
+		if model_selection not in ['LSTM', 'ConvLSTM']:
+			batch_t = batch_t.to(device)
+		batch_y = batch_y.to(device)
+			
+		# Run the model, determining forward pass based on model selected
+		if model_selection in ['LSTM', 'ConvLSTM']:
+			batch_y_hat = lstm_model(batch_x)
+		elif model_selection == 'Time-Aware LSTM':
+			batch_y_hat = lstm_model(batch_x, batch_t)
+		elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
+			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
-	# Run the model, determining forward pass based on model selected
-	if model_selection in ['LSTM', 'ConvLSTM']:
-		batch_y_hat = lstm_model(batch_x)
-	elif model_selection == 'Time-Aware LSTM':
-		batch_y_hat = lstm_model(batch_x, batch_t)
-	elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
-		batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
-	
-	# Extracting the target prediction based on model output
-	batch_y_hat = batch_y_hat[0][0]
-	if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-		batch_y_hat = batch_y_hat.view(x_sh)
-	batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
-	
-	# Moving data off GPU now that model has ran
-	batch_y = batch_y.cpu()
-	batch_y_hat = batch_y_hat.cpu()
-	
-	# Transformating the data to temperature values
-	valid_y_min = torch.tensor(stored_parameters[0, 1])
-	valid_y_max = torch.tensor(stored_parameters[1, 1])
-	batch_y = (batch_y * (valid_y_max - valid_y_min)) + valid_y_min
-	batch_y_hat = (batch_y_hat * (valid_y_max - valid_y_min)) + valid_y_min
-	
-	# Storing all temperature-valued truths and predictions for
-	# one root mean squared error calculation to get error in
-	# terms of temperature
-	if count == 0:
-		cpu_y_temps = batch_y
-		cpu_y_hat_temps = batch_y_hat
-	else:
-		cpu_y_temps = torch.cat([cpu_y_temps, batch_y], dim = 0)
-		cpu_y_hat_temps = torch.cat([cpu_y_hat_temps, batch_y_hat], dim = 0)
-	count = count + 1
+		# Extracting the target prediction based on model output
+		batch_y_hat = batch_y_hat[0][0]
+		if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			batch_y_hat = batch_y_hat.view(x_sh)
+		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
+		
+		# Moving data off GPU now that model has ran
+		batch_y = batch_y.cpu()
+		batch_y_hat = batch_y_hat.cpu()
+		
+		# Transformating the data to temperature values
+		valid_y_min = torch.tensor(stored_parameters[0, 1])
+		valid_y_max = torch.tensor(stored_parameters[1, 1])
+		batch_y = (batch_y * (valid_y_max - valid_y_min)) + valid_y_min
+		batch_y_hat = (batch_y_hat * (valid_y_max - valid_y_min)) + valid_y_min
+		
+		# Storing all temperature-valued truths and predictions for
+		# one root mean squared error calculation to get error in
+		# terms of temperature
+		if count == 0:
+			cpu_y_temps = batch_y
+			cpu_y_hat_temps = batch_y_hat
+		else:
+			cpu_y_temps = torch.cat([cpu_y_temps, batch_y], dim = 0)
+			cpu_y_hat_temps = torch.cat([cpu_y_hat_temps, batch_y_hat], dim = 0)
+		count = count + 1
 
 
 # Saving the validation set loss

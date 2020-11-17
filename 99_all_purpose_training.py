@@ -591,7 +591,29 @@ with torch.no_grad():
 			cpu_y_temps = torch.cat([cpu_y_temps, batch_y], dim = 0)
 			cpu_y_hat_temps = torch.cat([cpu_y_hat_temps, batch_y_hat], dim = 0)
 		count = count + 1
-
+	# calculate and store the loss
+	valid_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
+	valid_set_loss = torch.sqrt(valid_set_loss)
+	valid_set_loss = valid_set_loss.item()
+	# print validation set loss
+	print("\tValidation set loss:", valid_set_loss)
+	# Saving the predictions and corresponding truths
+	np.save("outputs/valid_prediction.npy", cpu_y_hat_temps.numpy())
+	np.save("outputs/valid_truth.npy", cpu_y_temps.numpy())
+	
+	vol_ID = 0
+	for vol in vol_name_ls:
+		if vol_ID == 0:
+			index_min = 0
+		else:
+			index_min = vol_cutoff_indices_valid[vol_ID - 1]
+		index_max = vol_cutoff_indices_valid[vol_ID]
+		pred_vol = cpu_y_hat_temps[index_min:index_max, :, :, :, :]
+		true_vol = cpu_y_temps[index_min:index_max, :, :, :, :]
+		vol_loss = loss(pred_vol, true_vol)
+		vol_loss = torch.sqrt(vol_loss)
+		vol_loss = vol_loss.item()
+		print('\t\tValidation set loss for', vol, ':', vol_loss)
 
 # Saving the validation set loss
 np.save('outputs/final_valid_loss.npy', np.asarray(valid_set_loss))

@@ -207,7 +207,7 @@ for vol in volcanoes:
 	count += 1
 	vol_cutoff_indices.append(y_train.shape[0])
 	vol_name_ls.append(vol)
-	print('\t\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
+	print('\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 
 
 # Scale 0-1, replace NAs with scaled 0s
@@ -246,7 +246,7 @@ width = x_train.shape[4]
 lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=4)
 # Print number of model parameters
 total_params = sum(p.numel() for p in lstm_model.parameters() if p.requires_grad)
-print('\nTotal number of model parameters:', total_params, '\n')
+print('\tTotal number of model parameters:', total_params, '\n')
 
 
 
@@ -263,7 +263,7 @@ optimizer = torch.optim.Adam(lstm_model.parameters())
 if training_data_set == 'all':
 	training_set = efficient_Dataset(data_indices=range(y_train.shape[0]), x = x_train, t=t_train, y = y_train)
 else:
-	print('Imported all data, but only using training data for', training_data_set)
+	print('\tNote: imported all data, but only using training data for', training_data_set)
 	vol_ID = vol_name_ls.index(training_data_set)
 	index_max = vol_cutoff_indices[vol_ID]
 	if vol_ID == 0:
@@ -287,6 +287,7 @@ print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
 epochs = 2
+loop_begin_time = = datetime.now()
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()
@@ -342,7 +343,10 @@ for i in range(epochs):
 	# Marking the end time and computing difference, also printing epoch information
 	end_time = datetime.now()
 	time_diff = (end_time - begin_time).total_seconds()
-	print('Epoch: ', i, '\n\tMost recent batch loss: ', batch_loss.item(), '\n\t' + str(time_diff) + ' seconds elapsed')
+	print('\tEpoch:', i, '\n\t\tMost recent batch loss:', batch_loss.item(), '\n\t\t' + str(time_diff) + ' seconds elapsed')
+loop_end_time = datetime.now()
+loop_time_diff = (loop_end_time - loop_begin_time).total_seconds()
+print('\tTotal training-loop time:', loop_time_diff)
 
 
 # Saving the last training batch for reference
@@ -362,6 +366,9 @@ del batch_y
 del batch_y_hat
 del batch_loss
 torch.cuda.empty_cache()
+
+
+print("Beginning evaluation")
 
 
 # Getting the loss value for the whole training set
@@ -434,7 +441,7 @@ with torch.no_grad():
 	train_set_loss = torch.sqrt(train_set_loss)
 	train_set_loss = train_set_loss.item()
 	# print training set loss
-	print("\nTraining set loss:", train_set_loss)
+	print("\tTraining set loss:", train_set_loss)
 	# Saving the predictions and corresponding truths
 	np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/train_truth.npy", cpu_y_temps.numpy())
@@ -512,7 +519,7 @@ with torch.no_grad():
 	valid_set_loss = torch.sqrt(valid_set_loss)
 	valid_set_loss = valid_set_loss.item()
 	# print validation set loss
-	print("\nValidation set loss:", valid_set_loss)
+	print("\tValidation set loss:", valid_set_loss)
 	# Saving the predictions and corresponding truths
 	np.save("outputs/valid_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/valid_truth.npy", cpu_y_temps.numpy())

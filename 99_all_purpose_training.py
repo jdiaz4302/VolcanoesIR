@@ -531,7 +531,7 @@ with torch.no_grad():
 # Determine validation set performance by volcano
 with torch.no_grad():
 	count = 0
-	for i in range(len(y_train)):
+	for i in range(len(y_valid)):
 		batch_x = x_valid[[i], :, :, :, :]
 		batch_t = t_valid[[i], :, :, :, :]
 		batch_y = y_valid[[i], :, :, :, :]

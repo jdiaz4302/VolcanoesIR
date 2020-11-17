@@ -51,14 +51,17 @@
 
 # Gathering function inputs
 model_selection = input("Which model do you select?")
+print('Model selected:', model_selection)
 assert(model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
 training_data_set = input("Which set of training data do you want to use?")
+print('Training data set:', training_data_set)
 n_layers = int(input("Enter number of layers: ")) 
 hidden_dim_ls = []
 # iterating till the range 
 for i in range(n_layers): 
 	layer_dim = int(input()) 
 	hidden_dim_ls.append(layer_dim)
+print('Hidden layers:', hidden_dim_ls)
 
 
 # Libraries and imports

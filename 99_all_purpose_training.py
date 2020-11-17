@@ -246,7 +246,7 @@ width = x_train.shape[4]
 lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=4)
 # Print number of model parameters
 total_params = sum(p.numel() for p in lstm_model.parameters() if p.requires_grad)
-print('\tTotal number of model parameters:', total_params, '\n')
+print('\tTotal number of model parameters:', total_params)
 
 
 

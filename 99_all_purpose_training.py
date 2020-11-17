@@ -207,7 +207,7 @@ for vol in volcanoes:
 		y_test = np.append(y_test, y_scenes_train, axis = 0)
 	count += 1
 	vol_cutoff_indices.append(y_train.shape[0])
-    vol_cutoff_indices_valid.append(y_valid.shape[0])
+	vol_cutoff_indices_valid.append(y_valid.shape[0])
 	vol_name_ls.append(vol)
 	print('\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 	print('\t\timported ' + str(x_scenes_valid.shape[0]) + ' validation scenes from ' + vol)
@@ -530,11 +530,11 @@ with torch.no_grad():
 
 # Determine validation set performance by volcano
 for i in range(len(y_train)):
-    batch_x = x_valid[[i], :, :, :, :]
-    batch_t = t_valid[[i], :, :, :, :]
-    batch_y = y_valid[[i], :, :, :, :]
-    
-    # reshaping data if needed for non-spatial LSTMs
+	batch_x = x_valid[[i], :, :, :, :]
+	batch_t = t_valid[[i], :, :, :, :]
+	batch_y = y_valid[[i], :, :, :, :]
+	
+	# reshaping data if needed for non-spatial LSTMs
 	if model_selection in ['LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 		x_sh = batch_x.shape
 		batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])

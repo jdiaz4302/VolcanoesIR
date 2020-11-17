@@ -614,6 +614,7 @@ with torch.no_grad():
 		vol_loss = torch.sqrt(vol_loss)
 		vol_loss = vol_loss.item()
 		print('\t\tValidation set loss for', vol, ':', vol_loss)
+		vol_ID += 1
 
 # Saving the validation set loss
 np.save('outputs/final_valid_loss.npy', np.asarray(valid_set_loss))

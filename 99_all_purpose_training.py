@@ -287,7 +287,7 @@ print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
 epochs = 2
-loop_begin_time = = datetime.now()
+loop_begin_time = datetime.now()
 for i in range(epochs):
 	# Marking the beginning time of epoch
 	begin_time = datetime.now()

@@ -292,7 +292,7 @@ lstm_model = torch.nn.DataParallel(lstm_model)
 print("Beginning training")
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 2
+epochs = 100
 loop_begin_time = datetime.now()
 for i in range(epochs):
 	# Marking the beginning time of epoch

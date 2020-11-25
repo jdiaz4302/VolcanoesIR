@@ -316,6 +316,7 @@ for i in range(epochs):
 			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
+		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_t = batch_t[:,:,[0]]
 		
 		# move to GPU
@@ -401,6 +402,7 @@ with torch.no_grad():
 			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
+		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_t = batch_t[:,:,[0]]
 		
 		# move to GPU
@@ -479,6 +481,7 @@ with torch.no_grad():
 			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
+		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_t = batch_t[:,:,[0]]
 			
 		# move to GPU

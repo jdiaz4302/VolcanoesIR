@@ -83,6 +83,8 @@ elif model_selection == 'ConvLSTM':
 	from models.ConvLSTM import ConvLSTM as LSTM_Model
 elif model_selection == 'ConvTimeLSTM':
 	from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
+elif model_selection == 'ConvTimeAwareLSTM':
+	from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 

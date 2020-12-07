@@ -76,7 +76,7 @@ from torch.utils import data
 if model_selection == 'LSTM':
 	from models.LSTM import StackedLSTM as LSTM_Model
 elif model_selection == 'Identity':
-    from models.Identity import Identity2 as LSTM_Model
+	from models.Identity import Identity2 as LSTM_Model
 elif model_selection == 'TimeLSTM':
 	from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
 elif model_selection == 'Time-Aware LSTM':
@@ -337,7 +337,8 @@ for i in range(epochs):
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		batch_y_hat = batch_y_hat[0][0]
+		if model_selection != 'Identity':
+			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.view(x_sh)
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
@@ -423,7 +424,8 @@ with torch.no_grad():
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		batch_y_hat = batch_y_hat[0][0]
+		if model_selection != 'Identity':
+			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.view(x_sh)
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]
@@ -502,7 +504,8 @@ with torch.no_grad():
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		batch_y_hat = batch_y_hat[0][0]
+		if model_selection != 'Identity':
+			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.view(x_sh)
 		batch_y_hat = batch_y_hat[:, -2:-1, :, :, :]

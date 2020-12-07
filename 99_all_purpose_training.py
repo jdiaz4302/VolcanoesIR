@@ -348,9 +348,10 @@ for i in range(epochs):
 		loss_list.append(batch_loss.item())
 		
 		# update parameters
-		optimizer.zero_grad()
-		batch_loss.backward()
-		optimizer.step()
+		if model_selection != 'Identity':
+			optimizer.zero_grad()
+			batch_loss.backward()
+			optimizer.step()
 		
 	# Marking the end time and computing difference, also printing epoch information
 	end_time = datetime.now()

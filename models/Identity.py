@@ -17,7 +17,7 @@ class Identity(nn.Module):
         self.GPU = GPU
         self.input_size = input_size # image h and w, relic from/for spatial models
         self.num_layers = num_layers # also relic
-        self.weight = nn.Parameter(torch.Tensor(5, 5))
+        self.weight = nn.Parameter(torch.Tensor(1, 1))
         self.init_weights()
     
     def init_weights(self):
@@ -41,7 +41,7 @@ class Identity2(torch.nn.Module):
         self.input_size = input_size # image h and w, relic from/for spatial models
         self.num_layers = num_layers # also relic
         
-        self.weight = nn.Parameter(torch.Tensor(5, 5))
+        self.weight = nn.Parameter(torch.Tensor(1, 1))
 
     def forward(self, x):
 

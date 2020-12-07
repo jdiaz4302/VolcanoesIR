@@ -36,7 +36,7 @@ class Identity(nn.Module):
 class Identity2(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, GPU, input_size=False, num_layers=False):
         """Simply stacking the simple TimeLSTM for multilayer model"""
-        super(StackedLSTM, self).__init__()
+        super(Identity2, self).__init__()
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.GPU = GPU

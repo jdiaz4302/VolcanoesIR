@@ -308,14 +308,14 @@ for i in range(epochs):
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			x_sh = batch_x.shape
-			batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-			# We wont reshape y, instead y_hat to fit y
-			y_sh = batch_y.shape
+            batch_x = batch_x.permute(0, 3, 4, 1, 2)
+            x_sh = batch_x.shape
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
 		# Only further processing time in a time-conscious, non-spatial LSTM
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
 			t_sh = batch_t.shape
-			batch_t = batch_t.view(t_sh[0]*t_sh[3]*t_sh[4], t_sh[1], t_sh[2])
+            batch_t = batch_t.permute(0, 3, 4, 1, 2)
+			batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
@@ -398,8 +398,6 @@ with torch.no_grad():
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			x_sh = batch_x.shape
 			batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-			# We wont reshape y, instead y_hat to fit y
-			y_sh = batch_y.shape
 		# Only further processing time in a time-conscious, non-spatial LSTM
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
 			t_sh = batch_t.shape
@@ -478,8 +476,6 @@ with torch.no_grad():
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			x_sh = batch_x.shape
 			batch_x = batch_x.view(x_sh[0]*x_sh[3]*x_sh[4], x_sh[1], x_sh[2])
-			# We wont reshape y, instead y_hat to fit y
-			y_sh = batch_y.shape
 		# Only further processing time in a time-conscious, non-spatial LSTM
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
 			t_sh = batch_t.shape

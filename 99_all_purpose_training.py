@@ -133,7 +133,8 @@ for vol in volcanoes:
 	out_n = int(np.floor((len(volcano_scenes) - num_input_scenes)*out_samp_perc))
 	# For every data partition
 	# Array for the prior scenes
-	x_scenes_train = np.zeros([train_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
+    #   "train_n - 1" is to remove the first scene that wont have an associated Time-Aware LSTM time interval
+	x_scenes_train = np.zeros([train_n - 1, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	x_scenes_valid = np.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	x_scenes_test = np.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	# Array for the time differences between scenes
@@ -141,23 +142,22 @@ for vol in volcanoes:
 	time_differences_valid = np.ones(x_scenes_valid.shape)
 	time_differences_test = np.ones(x_scenes_test.shape)
 	# Array for the target scenes
-	y_scenes_train = np.zeros([train_n, 1, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
+	y_scenes_train = np.zeros([train_n - 1, 1, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	y_scenes_valid = np.zeros([out_n, 1, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	y_scenes_test = np.zeros([out_n, 1, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	# Array for the prior max temperature above the background
-	x_temperatures_train = np.zeros([train_n, num_input_scenes])
+	x_temperatures_train = np.zeros([train_n - 1, num_input_scenes])
 	x_temperatures_valid = np.zeros([out_n, num_input_scenes])
 	x_temperatures_test = np.zeros([out_n, num_input_scenes])
 	# Array for the target max temperature above the background
-	y_temperatures_train = np.zeros([train_n])
+	y_temperatures_train = np.zeros([train_n - 1])
 	y_temperatures_valid = np.zeros([out_n])
 	y_temperatures_test = np.zeros([out_n])
 	# Formatting the string dates as datetime objects
 	formatted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in tabular_metadata['dates']]
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
-    #     Likewise, last data point wont have a Time-LSTM time value
-    #     And, the first data point wont have a Time-Aware LSTM time value
-	for i in range(num_input_scenes, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
+    #     Also, the first data point wont have a Time-Aware LSTM time value, so it is omitted
+	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
 			x_scenes_train[i - num_input_scenes, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
@@ -244,18 +244,6 @@ for vol in volcanoes:
 	vol_name_ls.append(vol)
 	print('\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 	print('\t\timported ' + str(x_scenes_valid.shape[0]) + ' validation scenes from ' + vol)
-
-
-# Gap filling with previous values
-# For all sequences
-for i in range(len(x_train)):
-    for j in range(x_train.shape[1]):
-        # Identifying missing values
-        ma = np.ma.masked_invalid(X[i, j, :, :, :])
-        # If the mask found NA values
-        if not np.all(ma.mask == False):
-            # Using previous value to fill
-            X[i, j, :, :, :][ma.mask == True] = X[i, j-1, :, :, :][ma.mask == True]
 
 
 # Scale 0-1, replace NAs with scaled 0s

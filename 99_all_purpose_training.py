@@ -64,29 +64,29 @@ for i in range(n_layers):
 print('Hidden layers:', hidden_dim_ls)
 
 
-# Libraries and imports
-import os
-import numpy as np
-import pandas as pd
-from datetime import datetime
-import torch
-from torch.autograd import Variable
-import torch.nn as nn
-from torch.utils import data
-if model_selection == 'LSTM':
-	from models.LSTM import StackedLSTM as LSTM_Model
-elif model_selection == 'Identity':
-	from models.Identity import Identity2 as LSTM_Model
-elif model_selection == 'TimeLSTM':
-	from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
-elif model_selection == 'Time-Aware LSTM':
-	from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
-elif model_selection == 'ConvLSTM':
-	from models.ConvLSTM import ConvLSTM as LSTM_Model
-elif model_selection == 'ConvTimeLSTM':
-	from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
-elif model_selection == 'ConvTimeAwareLSTM':
-	from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
+    # Libraries and imports
+    import os
+    import numpy as np
+    import pandas as pd
+    from datetime import datetime
+    import torch
+    from torch.autograd import Variable
+    import torch.nn as nn
+    from torch.utils import data
+    if model_selection == 'LSTM':
+        from models.LSTM import StackedLSTM as LSTM_Model
+    elif model_selection == 'Identity':
+        from models.Identity import Identity2 as LSTM_Model
+    elif model_selection == 'TimeLSTM':
+        from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
+    elif model_selection == 'Time-Aware LSTM':
+        from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
+    elif model_selection == 'ConvLSTM':
+        from models.ConvLSTM import ConvLSTM as LSTM_Model
+    elif model_selection == 'ConvTimeLSTM':
+        from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
+    elif model_selection == 'ConvTimeAwareLSTM':
+        from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 
@@ -157,7 +157,7 @@ for vol in volcanoes:
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
     #     Likewise, last data point wont have a Time-LSTM time value
     #     And, the first data point wont have a Time-Aware LSTM time value
-	for i in range(num_input_scenes+1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
+	for i in range(num_input_scenes, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
 			x_scenes_train[i - num_input_scenes, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
@@ -244,6 +244,18 @@ for vol in volcanoes:
 	vol_name_ls.append(vol)
 	print('\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 	print('\t\timported ' + str(x_scenes_valid.shape[0]) + ' validation scenes from ' + vol)
+
+
+# Gap filling with previous values
+# For all sequences
+for i in range(len(x_train)):
+    for j in range(x_train.shape[1]):
+        # Identifying missing values
+        ma = np.ma.masked_invalid(X[i, j, :, :, :])
+        # If the mask found NA values
+        if not np.all(ma.mask == False):
+            # Using previous value to fill
+            X[i, j, :, :, :][ma.mask == True] = X[i, j-1, :, :, :][ma.mask == True]
 
 
 # Scale 0-1, replace NAs with scaled 0s

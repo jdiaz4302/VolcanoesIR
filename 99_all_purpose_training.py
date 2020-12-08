@@ -340,7 +340,8 @@ for i in range(epochs):
 		if model_selection != 'Identity':
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = batch_y_hat.view(x_sh)
+			batch_y_hat = batch_y_hat.reshape(x_sh)
+            batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# calculate and store the loss
@@ -428,7 +429,8 @@ with torch.no_grad():
 		if model_selection != 'Identity':
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = batch_y_hat.view(x_sh)
+			batch_y_hat = batch_y_hat.reshape(x_sh)
+            batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran
@@ -508,7 +510,8 @@ with torch.no_grad():
 		if model_selection != 'Identity':
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_y_hat = batch_y_hat.view(x_sh)
+			batch_y_hat = batch_y_hat.reshape(x_sh)
+            batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran

@@ -64,29 +64,29 @@ for i in range(n_layers):
 print('Hidden layers:', hidden_dim_ls)
 
 
-    # Libraries and imports
-    import os
-    import numpy as np
-    import pandas as pd
-    from datetime import datetime
-    import torch
-    from torch.autograd import Variable
-    import torch.nn as nn
-    from torch.utils import data
-    if model_selection == 'LSTM':
-        from models.LSTM import StackedLSTM as LSTM_Model
-    elif model_selection == 'Identity':
-        from models.Identity import Identity2 as LSTM_Model
-    elif model_selection == 'TimeLSTM':
-        from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
-    elif model_selection == 'Time-Aware LSTM':
-        from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
-    elif model_selection == 'ConvLSTM':
-        from models.ConvLSTM import ConvLSTM as LSTM_Model
-    elif model_selection == 'ConvTimeLSTM':
-        from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
-    elif model_selection == 'ConvTimeAwareLSTM':
-        from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
+# Libraries and imports
+import os
+import numpy as np
+import pandas as pd
+from datetime import datetime
+import torch
+from torch.autograd import Variable
+import torch.nn as nn
+from torch.utils import data
+if model_selection == 'LSTM':
+    from models.LSTM import StackedLSTM as LSTM_Model
+elif model_selection == 'Identity':
+    from models.Identity import Identity2 as LSTM_Model
+elif model_selection == 'TimeLSTM':
+    from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
+elif model_selection == 'Time-Aware LSTM':
+    from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
+elif model_selection == 'ConvLSTM':
+    from models.ConvLSTM import ConvLSTM as LSTM_Model
+elif model_selection == 'ConvTimeLSTM':
+    from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
+elif model_selection == 'ConvTimeAwareLSTM':
+    from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 

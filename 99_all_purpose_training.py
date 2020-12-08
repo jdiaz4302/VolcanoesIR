@@ -160,64 +160,64 @@ for vol in volcanoes:
 	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
-			x_scenes_train[i - num_input_scenes, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
-			y_scenes_train[i - num_input_scenes, 0, :, :, :] = volcano_scenes[i, :, :, :]
+			x_scenes_train[i - num_input_scenes - 1, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
+			y_scenes_train[i - num_input_scenes - 1, 0, :, :, :] = volcano_scenes[i, :, :, :]
 			# Store the max temperature scalars
-			x_temperatures_train[i - num_input_scenes, :] = tabular_metadata['T_above_back'].values[(i - num_input_scenes):i]
-			y_temperatures_train[i - num_input_scenes] = tabular_metadata['T_above_back'].values[i]
+			x_temperatures_train[i - num_input_scenes - 1, :] = tabular_metadata['T_above_back'].values[(i - num_input_scenes):i]
+			y_temperatures_train[i - num_input_scenes - 1] = tabular_metadata['T_above_back'].values[i]
 			# Compute the time differences and store
 			# Time LSTM uses forward-time interval
 			if model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
 				dates_i_plus_1 = formatted_dates[(i - num_input_scenes + 1):(i + 1)]
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				for j in range(len(dates_i_plus_1)):
-					time_differences_train[i - num_input_scenes, j] = (dates_i_plus_1[j] - dates_i[j]).days
+					time_differences_train[i - num_input_scenes - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
 			# While Time-Aware LSTM uses backwards-time interval
 			else:
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
 				for j in range(len(dates_i)):
-					time_differences_train[i - num_input_scenes, j] = (dates_i[j] - dates_i_minus_1[j]).days
+					time_differences_train[i - num_input_scenes - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
 		elif i < (train_n + out_n + num_input_scenes):
 			# Store the image data
-			x_scenes_valid[i - train_n - num_input_scenes, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
-			y_scenes_valid[i - train_n - num_input_scenes, 0, :, :, :] = volcano_scenes[i, :, :, :]
+			x_scenes_valid[i - train_n - num_input_scenes - 1, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
+			y_scenes_valid[i - train_n - num_input_scenes - 1, 0, :, :, :] = volcano_scenes[i, :, :, :]
 			# Store the max temperature scalars
-			x_temperatures_valid[i - train_n - num_input_scenes, :] = tabular_metadata['T_above_back'].values[(i - num_input_scenes):i]
-			y_temperatures_valid[i - train_n - num_input_scenes] = tabular_metadata['T_above_back'].values[i]
+			x_temperatures_valid[i - train_n - num_input_scenes - 1, :] = tabular_metadata['T_above_back'].values[(i - num_input_scenes):i]
+			y_temperatures_valid[i - train_n - num_input_scenes - 1] = tabular_metadata['T_above_back'].values[i]
 			# Compute the time differences and store
 			# Time LSTM uses forward-time interval
 			if model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
 				dates_i_plus_1 = formatted_dates[(i - num_input_scenes + 1):(i + 1)]
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				for j in range(len(dates_i_plus_1)):
-					time_differences_valid[i - num_input_scenes - train_n, j] = (dates_i_plus_1[j] - dates_i[j]).days
+					time_differences_valid[i - num_input_scenes - train_n - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
 			# While Time-Aware LSTM uses backwards-time interval
 			else:
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
 				for j in range(len(dates_i)):
-					time_differences_valid[i - num_input_scenes - train_n, j] = (dates_i[j] - dates_i_minus_1[j]).days
+					time_differences_valid[i - num_input_scenes - train_n - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
 		else:
 			# Store the image data
-			x_scenes_test[i - train_n - out_n - num_input_scenes, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
-			y_scenes_test[i - train_n - out_n - num_input_scenes, 0, :, :, :] = volcano_scenes[i, :, :, :]
+			x_scenes_test[i - train_n - out_n - num_input_scenes - 1, :, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :, :]
+			y_scenes_test[i - train_n - out_n - num_input_scenes - 1, 0, :, :, :] = volcano_scenes[i, :, :, :]
 			# Store the max temperature scalars
-			x_temperatures_test[i - train_n - out_n - num_input_scenes, :] = tabular_metadata['T_above_back'].values[(i - num_input_scenes):i]
-			y_temperatures_test[i - train_n - out_n - num_input_scenes] = tabular_metadata['T_above_back'].values[i]
+			x_temperatures_test[i - train_n - out_n - num_input_scenes - 1, :] = tabular_metadata['T_above_back'].values[(i - num_input_scenes):i]
+			y_temperatures_test[i - train_n - out_n - num_input_scenes - 1] = tabular_metadata['T_above_back'].values[i]
 			# Compute the time differences and store
 			# Time LSTM uses forward-time interval
 			if model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
 				dates_i_plus_1 = formatted_dates[(i - num_input_scenes + 1):(i + 1)]
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				for j in range(len(dates_i_plus_1)):
-					time_differences_test[i - num_input_scenes - train_n - out_n, j] = (dates_i_plus_1[j] - dates_i[j]).days
+					time_differences_test[i - num_input_scenes - train_n - out_n - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
 			# While Time-Aware LSTM uses backwards-time interval
 			else:
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
 				for j in range(len(dates_i)):
-					time_differences_test[i - num_input_scenes - train_n - out_n, j] = (dates_i[j] - dates_i_minus_1[j]).days
+					time_differences_test[i - num_input_scenes - train_n - out_n - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
 	if count == 0:
 		x_train = x_scenes_train
 		t_train = time_differences_train

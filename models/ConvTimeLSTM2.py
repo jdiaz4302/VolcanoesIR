@@ -158,7 +158,7 @@ class ConvTime_LSTM2Cell(nn.Module):
          
         ## The output gate ##
         ## Running the output gate convolution ##
-        o_conv_output = self.o_conv(x_h_t_combined)
+        o_conv_output = self.o_conv(x_h_combined)
         ## Running the output LSTM gate equations ##
         o_m = torch.sigmoid(o_conv_output)
         
@@ -179,7 +179,7 @@ class ConvTime_LSTM2Cell(nn.Module):
 
 class ConvTime_LSTM2(nn.Module):
 
-    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(5,5),
+    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(3,3),
                  batch_first=True, bias=True, return_all_layers=False):
         super(ConvTime_LSTM2, self).__init__()
 

@@ -179,7 +179,7 @@ class ConvTime_LSTM2Cell(nn.Module):
 
 class ConvTime_LSTM2(nn.Module):
 
-    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(3,3),
+    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(5, 5),
                  batch_first=True, bias=True, return_all_layers=False):
         super(ConvTime_LSTM2, self).__init__()
 

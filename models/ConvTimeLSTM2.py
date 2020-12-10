@@ -158,7 +158,7 @@ class ConvTime_LSTM2Cell(nn.Module):
          
         ## The output gate ##
         ## Running the output gate convolution ##
-        o_conv_output = self.o_conv(x_h_combined)
+        o_conv_output = self.o_conv(x_h_t_combined)
         ## Running the output LSTM gate equations ##
         o_m = torch.sigmoid(o_conv_output)
         

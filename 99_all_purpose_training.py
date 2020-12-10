@@ -289,7 +289,7 @@ for i in range(len(x_valid)):
 for i in range(len(x_test)):
     for j in range(x_test.shape[1]):
         # Identifying missing values
-        ma = np.ma.masked_intest(x_test[i, j, :, :, :])
+        ma = np.ma.masked_invalid(x_test[i, j, :, :, :])
         # If the mask found NA values
         if not np.all(ma.mask == False):
             print(i, j)
@@ -328,7 +328,7 @@ for i in range(y_valid):
         else:
             y_valid[i, :, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :, :][ma.mask == True]
 for i in range(y_test):
-    ma = np.ma.masked_intest(y_test[i, :, :, :, :])
+    ma = np.ma.masked_invalid(y_test[i, :, :, :, :])
     # If the mask found NA values
     if not np.all(ma.mask == False):
         print(i)

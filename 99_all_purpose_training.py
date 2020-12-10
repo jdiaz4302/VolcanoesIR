@@ -386,8 +386,7 @@ lstm_model.cuda()
 
 
 # Setting optimization methods
-#loss = torch.nn.MSELoss()
-loss = 
+loss = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(lstm_model.parameters())
 
 

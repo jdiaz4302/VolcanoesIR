@@ -305,7 +305,7 @@ for i in range(len(x_test)):
             else:
                 x_test[i, j, :, :, :][ma.mask == True] = x_test[i, j-1, :, :, :][ma.mask == True]
                 t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i, j-1, :, :, :][ma.mask == True]
-for i in range(y_train):
+for i in range(len(y_train)):
     ma = np.ma.masked_invalid(y_train[i, :, :, :, :])
     # If the mask found NA values
     if not np.all(ma.mask == False):
@@ -316,7 +316,7 @@ for i in range(y_train):
             y_train[i, :, :, :, :][ma.mask == True] = zero_vals
         else:
             y_train[i, :, :, :, :][ma.mask == True] = y_train[i-1, :, :, :, :][ma.mask == True]
-for i in range(y_valid):
+for i in range(len(y_valid)):
     ma = np.ma.masked_invalid(y_valid[i, :, :, :, :])
     # If the mask found NA values
     if not np.all(ma.mask == False):
@@ -327,7 +327,7 @@ for i in range(y_valid):
             y_valid[i, :, :, :, :][ma.mask == True] = zero_vals
         else:
             y_valid[i, :, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :, :][ma.mask == True]
-for i in range(y_test):
+for i in range(len(y_test)):
     ma = np.ma.masked_invalid(y_test[i, :, :, :, :])
     # If the mask found NA values
     if not np.all(ma.mask == False):

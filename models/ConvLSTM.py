@@ -68,7 +68,7 @@ class ConvLSTMCell(nn.Module):
 
 class ConvLSTM(nn.Module):
 
-    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(5, 5),
+    def __init__(self, input_dim, hidden_dim, GPU, input_size, num_layers, kernel_size=(3, 3),
                  batch_first=True, bias=True, return_all_layers=False):
         super(ConvLSTM, self).__init__()
 

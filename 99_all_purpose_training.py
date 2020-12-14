@@ -347,10 +347,10 @@ y_test_differenced = y_train[1:len(y_test), :, :, :, :] - y_train[0:len(y_test)-
 
 # Reproviding the first value
 # Train
-#   X needs more work
-#   Y
-first_train_differenced_y = y_train[[0], :, :, :, :] - x_train[[-1], [-1], :, :, :]
-y_train_differenced = np.concatenate([first_train_differenced_y, y_train_differenced], axis = 0)
+#   X needs more work, has to draw from volcano_scenes which cycles through directories and may have NAs
+#   Y suffers as a result of X
+#       first_train_differenced_y = y_train[[0], :, :, :, :] - x_train[[-1], [-1], :, :, :]
+#       y_train_differenced = np.concatenate([first_train_differenced_y, y_train_differenced], axis = 0)
 # Validation
 #   X
 first_valid_differenced = x_valid[[0], :, :, :, :] - x_train[[-1], :, :, :, :]

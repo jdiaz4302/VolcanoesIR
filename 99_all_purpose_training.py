@@ -366,15 +366,25 @@ x_test_differenced = np.concatenate([first_test_differenced, x_test_differenced]
 first_test_differenced_y = y_test[[0], :, :, :, :] - x_test[[-1], [-1], :, :, :]
 y_test_differenced = np.concatenate([first_test_differenced_y, y_test_differenced], axis = 0)
 # Replacing state values with differenced values
-del x_train, y_train
-del x_valid, y_valid
-del x_test, y_test
+x_train_og = x_train
+y_train_og = y_train
+x_valid_og = x_valid
+y_valid_og = y_valid
+x_test_og = x_test
+y_test_og = y_test
 x_train = x_train_differenced
 x_valid = x_valid_differenced
 x_test = x_test_differenced 
 y_train = y_train_differenced
 y_valid = y_valid_differenced
-y_test = y_test_differenced 
+y_test = y_test_differenced
+# Saving undifferenced for evaluation
+np.save("outputs/x_train_undiff.npy", x_train_og)
+np.save("outputs/y_train_undiff.npy", y_train_og)
+np.save("outputs/x_valid_undiff.npy", x_valid_og)
+np.save("outputs/y_valid_undiff.npy", y_valid_og)
+np.save("outputs/x_test_undiff.npy", x_test_og)
+np.save("outputs/y_test_undiff.npy", y_test_og)
 
 
 # Scale 0-1

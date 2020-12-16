@@ -336,59 +336,6 @@ for i in range(len(y_test)):
 			y_test[i, :, :, :, :][ma.mask == True] = y_test[i-1, :, :, :, :][ma.mask == True]
 
 
-# First differencing - which removes the first values
-# Train
-x_train_differenced = x_train[1:len(x_train), :, :, :, :] - x_train[0:len(x_train)-1, :, :, :, :]
-y_train_differenced = y_train[1:len(y_train), :, :, :, :] - y_train[0:len(y_train)-1, :, :, :, :]
-# Valid
-x_valid_differenced = x_train[1:len(x_valid), :, :, :, :] - x_train[0:len(x_valid)-1, :, :, :, :]
-y_valid_differenced = y_train[1:len(y_valid), :, :, :, :] - y_train[0:len(y_valid)-1, :, :, :, :]
-# Test
-x_test_differenced = x_train[1:len(x_test), :, :, :, :] - x_train[0:len(x_test)-1, :, :, :, :]
-y_test_differenced = y_train[1:len(y_test), :, :, :, :] - y_train[0:len(y_test)-1, :, :, :, :]
-
-# Reproviding the first value
-# Train
-#   X needs more work, has to draw from volcano_scenes which cycles through directories and may have NAs
-#   Y suffers as a result of X
-#       first_train_differenced_y = y_train[[0], :, :, :, :] - x_train[[-1], [-1], :, :, :]
-#       y_train_differenced = np.concatenate([first_train_differenced_y, y_train_differenced], axis = 0)
-# Validation
-#   X
-first_valid_differenced = x_valid[[0], :, :, :, :] - x_train[[-1], :, :, :, :]
-x_valid_differenced = np.concatenate([first_valid_differenced, x_valid_differenced], axis = 0)
-#   Y
-first_valid_differenced_y = y_valid[[0], :, :, :, :] - x_valid[[-1], [-1], :, :, :]
-y_valid_differenced = np.concatenate([first_valid_differenced_y, y_valid_differenced], axis = 0)
-# Test
-#   X
-first_test_differenced = x_test[[0], :, :, :, :] - x_valid[[-1], :, :, :, :]
-x_test_differenced = np.concatenate([first_test_differenced, x_test_differenced], axis = 0)
-#   Y
-first_test_differenced_y = y_test[[0], :, :, :, :] - x_test[[-1], [-1], :, :, :]
-y_test_differenced = np.concatenate([first_test_differenced_y, y_test_differenced], axis = 0)
-# Replacing state values with differenced values
-x_train_og = x_train
-y_train_og = y_train
-x_valid_og = x_valid
-y_valid_og = y_valid
-x_test_og = x_test
-y_test_og = y_test
-x_train = x_train_differenced
-x_valid = x_valid_differenced
-x_test = x_test_differenced 
-y_train = y_train_differenced
-y_valid = y_valid_differenced
-y_test = y_test_differenced
-# Saving undifferenced for evaluation
-np.save("outputs/x_train_undiff.npy", x_train_og)
-np.save("outputs/y_train_undiff.npy", y_train_og)
-np.save("outputs/x_valid_undiff.npy", x_valid_og)
-np.save("outputs/y_valid_undiff.npy", y_valid_og)
-np.save("outputs/x_test_undiff.npy", x_test_og)
-np.save("outputs/y_test_undiff.npy", y_test_og)
-
-
 # Scale 0-1
 # Also attempts to find NAs and replace with 0s, but those shouldnt exist anymore
 print("Processing data")

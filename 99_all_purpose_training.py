@@ -52,7 +52,7 @@
 # Gathering function inputs
 model_selection = input("Which model do you select?")
 print('Model selected:', model_selection)
-assert(model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
 training_data_set = input("Which set of training data do you want to use?")
 print('Training data set:', training_data_set)
 n_layers = int(input("Enter number of layers: ")) 
@@ -77,6 +77,8 @@ if model_selection == 'LSTM':
     from models.LSTM import StackedLSTM as LSTM_Model
 elif model_selection == 'Identity':
     from models.Identity import Identity2 as LSTM_Model
+elif model_selection == 'AR':
+    from models.AR import AR as LSTM_Model
 elif model_selection == 'TimeLSTM':
     from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
 elif model_selection == 'Time-Aware LSTM':
@@ -104,7 +106,7 @@ assert((training_data_set in volcanoes) or (training_data_set == "all"))
 
 # Training parameters
 # This needs to actually be variable, will do with later exploration
-batch_size_dict = {'Identity':84, 'LSTM':84, 'TimeLSTM':46, 'Time-Aware LSTM':70, 'ConvLSTM':24, 'ConvTimeLSTM':32, 'ConvTimeAwareLSTM':60}
+batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':84, 'TimeLSTM':46, 'Time-Aware LSTM':70, 'ConvLSTM':24, 'ConvTimeLSTM':32, 'ConvTimeAwareLSTM':60}
 lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
 batch_size = batch_size_dict[model_selection]
 num_input_scenes = lag_dict[training_data_set]
@@ -475,6 +477,10 @@ for i in range(epochs):
 		batch_x, batch_t, batch_y = data
 		
 		# reshaping data if needed for non-spatial LSTMs
+        if model_selection == 'AR':
+            batch_x = batch_x.permute(0, 1, 3, 4, 2)
+            x_sh = batch_x.shape
+            batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
@@ -492,12 +498,12 @@ for i in range(epochs):
 		# move to GPU
 		batch_x = batch_x.to(device)
 		# Only move time tensors to GPU if time-conscious LSTM
-		if model_selection not in ['Identity', 'LSTM', 'ConvLSTM']:
+		if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
 		# Run the model, determining forward pass based on model selected
-		if model_selection in ['Identity', 'LSTM', 'ConvLSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
 		elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_t)
@@ -505,11 +511,14 @@ for i in range(epochs):
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		if model_selection != 'Identity':
+		if model_selection not in ['AR', 'Identity']:
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
+        if model_selection == 'AR':
+            batch_y_hat = batch_y_hat.reshape(x_sh)
+            batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# calculate and store the loss
@@ -564,6 +573,10 @@ with torch.no_grad():
 		batch_x, batch_t, batch_y = data
 		
 		# reshaping data if needed for non-spatial LSTMs
+        if model_selection == 'AR':
+            batch_x = batch_x.permute(0, 1, 3, 4, 2)
+            x_sh = batch_x.shape
+            batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
@@ -581,12 +594,12 @@ with torch.no_grad():
 		# move to GPU
 		batch_x = batch_x.to(device)
 		# Only move time tensors to GPU if time-conscious LSTM
-		if model_selection not in ['Identity', 'LSTM', 'ConvLSTM']:
+		if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 		
 		# Run the model, determining forward pass based on model selected
-		if model_selection in ['Identity', 'LSTM', 'ConvLSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
 		elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_t)
@@ -594,11 +607,14 @@ with torch.no_grad():
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		if model_selection != 'Identity':
+		if model_selection not in ['AR', 'Identity']:
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
+        if model_selection == 'AR':
+            batch_y_hat = batch_y_hat.reshape(x_sh)
+            batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran
@@ -645,6 +661,10 @@ with torch.no_grad():
 		batch_y = y_valid[[i], :, :, :, :]
 		
 		# reshaping data if needed for non-spatial LSTMs
+        if model_selection == 'AR':
+            batch_x = batch_x.permute(0, 1, 3, 4, 2)
+            x_sh = batch_x.shape
+            batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
@@ -662,12 +682,12 @@ with torch.no_grad():
 		# move to GPU
 		batch_x = batch_x.to(device)
 		# Only move time tensors to GPU if time-conscious LSTM
-		if model_selection not in ['Identity', 'LSTM', 'ConvLSTM']:
+		if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_t = batch_t.to(device)
 		batch_y = batch_y.to(device)
 			
 		# Run the model, determining forward pass based on model selected
-		if model_selection in ['Identity', 'LSTM', 'ConvLSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
 		elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_y_hat = lstm_model(batch_x, batch_t)
@@ -675,11 +695,14 @@ with torch.no_grad():
 			batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 		
 		# Extracting the target prediction based on model output
-		if model_selection != 'Identity':
+		if model_selection not in ['AR', 'Identity']:
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
+        if model_selection == 'AR':
+            batch_y_hat = batch_y_hat.reshape(x_sh)
+            batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran

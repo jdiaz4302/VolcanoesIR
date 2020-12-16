@@ -74,21 +74,21 @@ from torch.autograd import Variable
 import torch.nn as nn
 from torch.utils import data
 if model_selection == 'LSTM':
-    from models.LSTM import StackedLSTM as LSTM_Model
+	from models.LSTM import StackedLSTM as LSTM_Model
 elif model_selection == 'Identity':
-    from models.Identity import Identity2 as LSTM_Model
+	from models.Identity import Identity2 as LSTM_Model
 elif model_selection == 'AR':
-    from models.AR import AR as LSTM_Model
+	from models.AR import AR as LSTM_Model
 elif model_selection == 'TimeLSTM':
-    from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
+	from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
 elif model_selection == 'Time-Aware LSTM':
-    from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
+	from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
 elif model_selection == 'ConvLSTM':
-    from models.ConvLSTM import ConvLSTM as LSTM_Model
+	from models.ConvLSTM import ConvLSTM as LSTM_Model
 elif model_selection == 'ConvTimeLSTM':
-    from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
+	from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
 elif model_selection == 'ConvTimeAwareLSTM':
-    from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
+	from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 from optimization import ssim
@@ -136,7 +136,7 @@ for vol in volcanoes:
 	out_n = int(np.floor((len(volcano_scenes) - num_input_scenes)*out_samp_perc))
 	# For every data partition
 	# Array for the prior scenes
-    #   "train_n - 1" is to remove the first scene that wont have an associated Time-Aware LSTM time interval
+	#   "train_n - 1" is to remove the first scene that wont have an associated Time-Aware LSTM time interval
 	x_scenes_train = np.zeros([train_n - 1, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	x_scenes_valid = np.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
 	x_scenes_test = np.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2], volcano_scenes.shape[3]])
@@ -159,7 +159,7 @@ for vol in volcanoes:
 	# Formatting the string dates as datetime objects
 	formatted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in tabular_metadata['dates']]
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
-    #     Also, the first data point wont have a Time-Aware LSTM time value, so it is omitted
+	#     Also, the first data point wont have a Time-Aware LSTM time value, so it is omitted
 	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
@@ -251,89 +251,89 @@ for vol in volcanoes:
 
 # Gap fill missing values with previous ones
 for i in range(len(x_train)):
-    for j in range(x_train.shape[1]):
-        # Identifying missing values
-        ma = np.ma.masked_invalid(x_train[i, j, :, :, :])
-        # If the mask found NA values
-        if not np.all(ma.mask == False):
-            # Using previous value to fill
-            if j == 0:
-                if i == 0:
-                    needed_shape = x_train[i, j, :, :, :][ma.mask == True].shape
-                    zero_vals = np.zeros(needed_shape)
-                    x_train[i, j, :, :, :][ma.mask == True] = zero_vals
-                else:
-                    x_train[i, j, :, :, :][ma.mask == True] = x_train[i-1, j, :, :, :][ma.mask == True]
-                    t_train[i, j, :, :, :][ma.mask == True] = t_train[i, j, :, :, :][ma.mask == True] + t_train[i-1, j, :, :, :][ma.mask == True]
-            else:
-                x_train[i, j, :, :, :][ma.mask == True] = x_train[i, j-1, :, :, :][ma.mask == True]
-                t_train[i, j, :, :, :][ma.mask == True] = t_train[i, j, :, :, :][ma.mask == True] + t_train[i, j-1, :, :, :][ma.mask == True]
+	for j in range(x_train.shape[1]):
+		# Identifying missing values
+		ma = np.ma.masked_invalid(x_train[i, j, :, :, :])
+		# If the mask found NA values
+		if not np.all(ma.mask == False):
+			# Using previous value to fill
+			if j == 0:
+				if i == 0:
+					needed_shape = x_train[i, j, :, :, :][ma.mask == True].shape
+					zero_vals = np.zeros(needed_shape)
+					x_train[i, j, :, :, :][ma.mask == True] = zero_vals
+				else:
+					x_train[i, j, :, :, :][ma.mask == True] = x_train[i-1, j, :, :, :][ma.mask == True]
+					t_train[i, j, :, :, :][ma.mask == True] = t_train[i, j, :, :, :][ma.mask == True] + t_train[i-1, j, :, :, :][ma.mask == True]
+			else:
+				x_train[i, j, :, :, :][ma.mask == True] = x_train[i, j-1, :, :, :][ma.mask == True]
+				t_train[i, j, :, :, :][ma.mask == True] = t_train[i, j, :, :, :][ma.mask == True] + t_train[i, j-1, :, :, :][ma.mask == True]
 for i in range(len(x_valid)):
-    for j in range(x_valid.shape[1]):
-        # Identifying missing values
-        ma = np.ma.masked_invalid(x_valid[i, j, :, :, :])
-        # If the mask found NA values
-        if not np.all(ma.mask == False):
-            # Using previous value to fill
-            if j == 0:
-                if i == 0:
-                    needed_shape = x_valid[i, j, :, :, :][ma.mask == True].shape
-                    zero_vals = np.zeros(needed_shape)
-                    x_valid[i, j, :, :, :][ma.mask == True] = zero_vals
-                else:
-                    x_valid[i, j, :, :, :][ma.mask == True] = x_valid[i-1, j, :, :, :][ma.mask == True]
-                    t_valid[i, j, :, :, :][ma.mask == True] = t_valid[i, j, :, :, :][ma.mask == True] + t_valid[i-1, j, :, :, :][ma.mask == True]
-            else:
-                x_valid[i, j, :, :, :][ma.mask == True] = x_valid[i, j-1, :, :, :][ma.mask == True]
-                t_valid[i, j, :, :, :][ma.mask == True] = t_valid[i, j, :, :, :][ma.mask == True] + t_valid[i, j-1, :, :, :][ma.mask == True]
+	for j in range(x_valid.shape[1]):
+		# Identifying missing values
+		ma = np.ma.masked_invalid(x_valid[i, j, :, :, :])
+		# If the mask found NA values
+		if not np.all(ma.mask == False):
+			# Using previous value to fill
+			if j == 0:
+				if i == 0:
+					needed_shape = x_valid[i, j, :, :, :][ma.mask == True].shape
+					zero_vals = np.zeros(needed_shape)
+					x_valid[i, j, :, :, :][ma.mask == True] = zero_vals
+				else:
+					x_valid[i, j, :, :, :][ma.mask == True] = x_valid[i-1, j, :, :, :][ma.mask == True]
+					t_valid[i, j, :, :, :][ma.mask == True] = t_valid[i, j, :, :, :][ma.mask == True] + t_valid[i-1, j, :, :, :][ma.mask == True]
+			else:
+				x_valid[i, j, :, :, :][ma.mask == True] = x_valid[i, j-1, :, :, :][ma.mask == True]
+				t_valid[i, j, :, :, :][ma.mask == True] = t_valid[i, j, :, :, :][ma.mask == True] + t_valid[i, j-1, :, :, :][ma.mask == True]
 for i in range(len(x_test)):
-    for j in range(x_test.shape[1]):
-        # Identifying missing values
-        ma = np.ma.masked_invalid(x_test[i, j, :, :, :])
-        # If the mask found NA values
-        if not np.all(ma.mask == False):
-            # Using previous value to fill
-            if j == 0:
-                if i == 0:
-                    needed_shape = x_test[i, j, :, :, :][ma.mask == True].shape
-                    zero_vals = np.zeros(needed_shape)
-                    x_test[i, j, :, :, :][ma.mask == True] = zero_vals
-                else:
-                    x_test[i, j, :, :, :][ma.mask == True] = x_test[i-1, j, :, :, :][ma.mask == True]
-                    t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i-1, j, :, :, :][ma.mask == True]
-            else:
-                x_test[i, j, :, :, :][ma.mask == True] = x_test[i, j-1, :, :, :][ma.mask == True]
-                t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i, j-1, :, :, :][ma.mask == True]
+	for j in range(x_test.shape[1]):
+		# Identifying missing values
+		ma = np.ma.masked_invalid(x_test[i, j, :, :, :])
+		# If the mask found NA values
+		if not np.all(ma.mask == False):
+			# Using previous value to fill
+			if j == 0:
+				if i == 0:
+					needed_shape = x_test[i, j, :, :, :][ma.mask == True].shape
+					zero_vals = np.zeros(needed_shape)
+					x_test[i, j, :, :, :][ma.mask == True] = zero_vals
+				else:
+					x_test[i, j, :, :, :][ma.mask == True] = x_test[i-1, j, :, :, :][ma.mask == True]
+					t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i-1, j, :, :, :][ma.mask == True]
+			else:
+				x_test[i, j, :, :, :][ma.mask == True] = x_test[i, j-1, :, :, :][ma.mask == True]
+				t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i, j-1, :, :, :][ma.mask == True]
 for i in range(len(y_train)):
-    ma = np.ma.masked_invalid(y_train[i, :, :, :, :])
-    # If the mask found NA values
-    if not np.all(ma.mask == False):
-        if i == 0:
-            needed_shape = y_train[i, :, :, :, :][ma.mask == True].shape
-            zero_vals = np.zeros(needed_shape)
-            y_train[i, :, :, :, :][ma.mask == True] = zero_vals
-        else:
-            y_train[i, :, :, :, :][ma.mask == True] = y_train[i-1, :, :, :, :][ma.mask == True]
+	ma = np.ma.masked_invalid(y_train[i, :, :, :, :])
+	# If the mask found NA values
+	if not np.all(ma.mask == False):
+		if i == 0:
+			needed_shape = y_train[i, :, :, :, :][ma.mask == True].shape
+			zero_vals = np.zeros(needed_shape)
+			y_train[i, :, :, :, :][ma.mask == True] = zero_vals
+		else:
+			y_train[i, :, :, :, :][ma.mask == True] = y_train[i-1, :, :, :, :][ma.mask == True]
 for i in range(len(y_valid)):
-    ma = np.ma.masked_invalid(y_valid[i, :, :, :, :])
-    # If the mask found NA values
-    if not np.all(ma.mask == False):
-        if i == 0:
-            needed_shape = y_valid[i, :, :, :, :][ma.mask == True].shape
-            zero_vals = np.zeros(needed_shape)
-            y_valid[i, :, :, :, :][ma.mask == True] = zero_vals
-        else:
-            y_valid[i, :, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :, :][ma.mask == True]
+	ma = np.ma.masked_invalid(y_valid[i, :, :, :, :])
+	# If the mask found NA values
+	if not np.all(ma.mask == False):
+		if i == 0:
+			needed_shape = y_valid[i, :, :, :, :][ma.mask == True].shape
+			zero_vals = np.zeros(needed_shape)
+			y_valid[i, :, :, :, :][ma.mask == True] = zero_vals
+		else:
+			y_valid[i, :, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :, :][ma.mask == True]
 for i in range(len(y_test)):
-    ma = np.ma.masked_invalid(y_test[i, :, :, :, :])
-    # If the mask found NA values
-    if not np.all(ma.mask == False):
-        if i == 0:
-            needed_shape = y_test[i, :, :, :, :][ma.mask == True].shape
-            zero_vals = np.zeros(needed_shape)
-            y_test[i, :, :, :, :][ma.mask == True] = zero_vals
-        else:
-            y_test[i, :, :, :, :][ma.mask == True] = y_test[i-1, :, :, :, :][ma.mask == True]
+	ma = np.ma.masked_invalid(y_test[i, :, :, :, :])
+	# If the mask found NA values
+	if not np.all(ma.mask == False):
+		if i == 0:
+			needed_shape = y_test[i, :, :, :, :][ma.mask == True].shape
+			zero_vals = np.zeros(needed_shape)
+			y_test[i, :, :, :, :][ma.mask == True] = zero_vals
+		else:
+			y_test[i, :, :, :, :][ma.mask == True] = y_test[i-1, :, :, :, :][ma.mask == True]
 
 
 # First differencing - which removes the first values
@@ -477,10 +477,10 @@ for i in range(epochs):
 		batch_x, batch_t, batch_y = data
 		
 		# reshaping data if needed for non-spatial LSTMs
-        if model_selection == 'AR':
-            batch_x = batch_x.permute(0, 1, 3, 4, 2)
-            x_sh = batch_x.shape
-            batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
+		if model_selection == 'AR':
+			batch_x = batch_x.permute(0, 1, 3, 4, 2)
+			x_sh = batch_x.shape
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
@@ -516,9 +516,9 @@ for i in range(epochs):
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-        if model_selection == 'AR':
-            batch_y_hat = batch_y_hat.reshape(x_sh)
-            batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
+		if model_selection == 'AR':
+			batch_y_hat = batch_y_hat.reshape(x_sh)
+			batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# calculate and store the loss
@@ -573,10 +573,10 @@ with torch.no_grad():
 		batch_x, batch_t, batch_y = data
 		
 		# reshaping data if needed for non-spatial LSTMs
-        if model_selection == 'AR':
-            batch_x = batch_x.permute(0, 1, 3, 4, 2)
-            x_sh = batch_x.shape
-            batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
+		if model_selection == 'AR':
+			batch_x = batch_x.permute(0, 1, 3, 4, 2)
+			x_sh = batch_x.shape
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
@@ -612,9 +612,9 @@ with torch.no_grad():
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-        if model_selection == 'AR':
-            batch_y_hat = batch_y_hat.reshape(x_sh)
-            batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
+		if model_selection == 'AR':
+			batch_y_hat = batch_y_hat.reshape(x_sh)
+			batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran
@@ -661,10 +661,10 @@ with torch.no_grad():
 		batch_y = y_valid[[i], :, :, :, :]
 		
 		# reshaping data if needed for non-spatial LSTMs
-        if model_selection == 'AR':
-            batch_x = batch_x.permute(0, 1, 3, 4, 2)
-            x_sh = batch_x.shape
-            batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
+		if model_selection == 'AR':
+			batch_x = batch_x.permute(0, 1, 3, 4, 2)
+			x_sh = batch_x.shape
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
@@ -700,9 +700,9 @@ with torch.no_grad():
 		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-        if model_selection == 'AR':
-            batch_y_hat = batch_y_hat.reshape(x_sh)
-            batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
+		if model_selection == 'AR':
+			batch_y_hat = batch_y_hat.reshape(x_sh)
+			batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran

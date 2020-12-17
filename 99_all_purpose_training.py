@@ -378,7 +378,8 @@ print('\tTotal number of model parameters:', total_params)
 
 
 # Passing to GPU
-lstm_model.cuda()
+if model_selection != 'AR':
+	lstm_model.cuda()
 
 
 # Setting optimization methods
@@ -440,11 +441,12 @@ for i in range(epochs):
 			batch_t = batch_t[:,:,[0]]
 		
 		# move to GPU
-		batch_x = batch_x.to(device)
-		# Only move time tensors to GPU if time-conscious LSTM
-		if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
-			batch_t = batch_t.to(device)
-		batch_y = batch_y.to(device)
+		if model_selection != 'AR':
+			batch_x = batch_x.to(device)
+			# Only move time tensors to GPU if time-conscious LSTM
+			if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
+				batch_t = batch_t.to(device)
+			batch_y = batch_y.to(device)
 		
 		# Run the model, determining forward pass based on model selected
 		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
@@ -528,12 +530,13 @@ with torch.no_grad():
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_t = batch_t[:,:,[0]]
 		
-		# move to GPU
-		batch_x = batch_x.to(device)
-		# Only move time tensors to GPU if time-conscious LSTM
-		if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
-			batch_t = batch_t.to(device)
-		batch_y = batch_y.to(device)
+		if model_selection != 'AR':
+			# move to GPU
+			batch_x = batch_x.to(device)
+			# Only move time tensors to GPU if time-conscious LSTM
+			if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
+				batch_t = batch_t.to(device)
+			batch_y = batch_y.to(device)
 		
 		# Run the model, determining forward pass based on model selected
 		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
@@ -610,11 +613,12 @@ with torch.no_grad():
 			batch_t = batch_t[:,:,[0]]
 			
 		# move to GPU
-		batch_x = batch_x.to(device)
-		# Only move time tensors to GPU if time-conscious LSTM
-		if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
-			batch_t = batch_t.to(device)
-		batch_y = batch_y.to(device)
+		if model_selection != 'AR':
+			batch_x = batch_x.to(device)
+			# Only move time tensors to GPU if time-conscious LSTM
+			if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
+				batch_t = batch_t.to(device)
+			batch_y = batch_y.to(device)
 			
 		# Run the model, determining forward pass based on model selected
 		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:

@@ -424,11 +424,7 @@ for i in range(epochs):
 		batch_x, batch_t, batch_y = data
 		
 		# reshaping data if needed for non-spatial LSTMs
-		if model_selection == 'AR':
-			batch_x = batch_x.permute(0, 1, 3, 4, 2)
-			x_sh = batch_x.shape
-			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
-		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
 			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
@@ -460,12 +456,9 @@ for i in range(epochs):
 		# Extracting the target prediction based on model output
 		if model_selection not in ['AR', 'Identity']:
 			batch_y_hat = batch_y_hat[0][0]
-		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-		if model_selection == 'AR':
-			batch_y_hat = batch_y_hat.reshape(x_sh)
-			batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# calculate and store the loss
@@ -520,11 +513,7 @@ with torch.no_grad():
 		batch_x, batch_t, batch_y = data
 		
 		# reshaping data if needed for non-spatial LSTMs
-		if model_selection == 'AR':
-			batch_x = batch_x.permute(0, 1, 3, 4, 2)
-			x_sh = batch_x.shape
-			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
-		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
 			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
@@ -556,12 +545,9 @@ with torch.no_grad():
 		# Extracting the target prediction based on model output
 		if model_selection not in ['AR', 'Identity']:
 			batch_y_hat = batch_y_hat[0][0]
-		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-		if model_selection == 'AR':
-			batch_y_hat = batch_y_hat.reshape(x_sh)
-			batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran
@@ -608,11 +594,7 @@ with torch.no_grad():
 		batch_y = y_valid[[i], :, :, :, :]
 		
 		# reshaping data if needed for non-spatial LSTMs
-		if model_selection == 'AR':
-			batch_x = batch_x.permute(0, 1, 3, 4, 2)
-			x_sh = batch_x.shape
-			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2]*x_sh[3], x_sh[4])
-		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_x = batch_x.permute(0, 3, 4, 1, 2)
 			x_sh = batch_x.shape
 			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
@@ -644,12 +626,9 @@ with torch.no_grad():
 		# Extracting the target prediction based on model output
 		if model_selection not in ['AR', 'Identity']:
 			batch_y_hat = batch_y_hat[0][0]
-		if model_selection in ['Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
 			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-		if model_selection == 'AR':
-			batch_y_hat = batch_y_hat.reshape(x_sh)
-			batch_y_hat = batch_y_hat.permute(0, 1, 4, 2, 3)
 		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 		
 		# Moving data off GPU now that model has ran

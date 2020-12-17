@@ -406,7 +406,7 @@ validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_
 
 # Determining compute options (GPU? Parallel?)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-if model != 'AR':
+if model_selection != 'AR':
 	lstm_model = torch.nn.DataParallel(lstm_model)
 
 

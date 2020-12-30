@@ -344,8 +344,8 @@ y_train_differenced = y_train[1:len(y_train), :, :, :, :] - y_train[0:len(y_trai
 x_valid_differenced = x_valid[1:len(x_valid), :, :, :, :] - x_valid[0:len(x_valid)-1, :, :, :, :]
 y_valid_differenced = y_valid[1:len(y_valid), :, :, :, :] - y_valid[0:len(y_valid)-1, :, :, :, :]
 # Test
-x_test_differenced = x_test[1:len(x_test), :, :, :, :] - x_train[0:len(x_test)-1, :, :, :, :]
-y_test_differenced = y_test[1:len(y_test), :, :, :, :] - y_train[0:len(y_test)-1, :, :, :, :]
+x_test_differenced = x_test[1:len(x_test), :, :, :, :] - x_test[0:len(x_test)-1, :, :, :, :]
+y_test_differenced = y_test[1:len(y_test), :, :, :, :] - y_test[0:len(y_test)-1, :, :, :, :]
 
 # Reproviding the first value
 # Train

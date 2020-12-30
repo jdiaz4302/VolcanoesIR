@@ -341,11 +341,11 @@ for i in range(len(y_test)):
 x_train_differenced = x_train[1:len(x_train), :, :, :, :] - x_train[0:len(x_train)-1, :, :, :, :]
 y_train_differenced = y_train[1:len(y_train), :, :, :, :] - y_train[0:len(y_train)-1, :, :, :, :]
 # Valid
-x_valid_differenced = x_train[1:len(x_valid), :, :, :, :] - x_train[0:len(x_valid)-1, :, :, :, :]
-y_valid_differenced = y_train[1:len(y_valid), :, :, :, :] - y_train[0:len(y_valid)-1, :, :, :, :]
+x_valid_differenced = x_valid[1:len(x_valid), :, :, :, :] - x_valid[0:len(x_valid)-1, :, :, :, :]
+y_valid_differenced = y_valid[1:len(y_valid), :, :, :, :] - y_valid[0:len(y_valid)-1, :, :, :, :]
 # Test
-x_test_differenced = x_train[1:len(x_test), :, :, :, :] - x_train[0:len(x_test)-1, :, :, :, :]
-y_test_differenced = y_train[1:len(y_test), :, :, :, :] - y_train[0:len(y_test)-1, :, :, :, :]
+x_test_differenced = x_test[1:len(x_test), :, :, :, :] - x_train[0:len(x_test)-1, :, :, :, :]
+y_test_differenced = y_test[1:len(y_test), :, :, :, :] - y_train[0:len(y_test)-1, :, :, :, :]
 
 # Reproviding the first value
 # Train
@@ -563,10 +563,10 @@ print("Beginning evaluation")
 # values for optimization
 with torch.no_grad():
 	count = 0
-	for data in train_loader:
-		
-		# data loader
-		batch_x, batch_t, batch_y = data
+	for i in range(len(y_train)):
+		batch_x = x_train[[i], :, :, :, :]
+		batch_t = t_train[[i], :, :, :, :]
+		batch_y = y_train[[i], :, :, :, :]
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:

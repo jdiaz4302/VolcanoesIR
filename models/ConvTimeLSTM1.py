@@ -116,6 +116,8 @@ class ConvTime_LSTM1Cell(nn.Module):
         ## The first time gate ##
         ## Running the first time convolution ##
         T1_conv_outputs = self.T1_conv(input_tensor)
+        print(T1_conv_outputs.shape)
+        print(t_T1.shape)
         T1_conv_outputs = T1_conv_outputs + t_T1
         ## Running the T1 LSTM gate equations ##
         T1_m = torch.sigmoid(T1_conv_outputs)

@@ -309,9 +309,7 @@ for i in range(len(y_train)):
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
 		if i == 0:
-			needed_shape = y_train[i, :, :, :, :][ma.mask == True].shape
-			zero_vals = np.zeros(needed_shape)
-			y_train[i, :, :, :, :][ma.mask == True] = zero_vals
+			y_train[i, :, :, :, :][ma.mask == True] = x_train[i, [-1], :, :, :][ma.mask == True]
 		else:
 			y_train[i, :, :, :, :][ma.mask == True] = y_train[i-1, :, :, :, :][ma.mask == True]
 for i in range(len(y_valid)):
@@ -319,9 +317,7 @@ for i in range(len(y_valid)):
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
 		if i == 0:
-			needed_shape = y_valid[i, :, :, :, :][ma.mask == True].shape
-			zero_vals = np.zeros(needed_shape)
-			y_valid[i, :, :, :, :][ma.mask == True] = zero_vals
+			y_valid[i, :, :, :, :][ma.mask == True] = x_valid[i, [-1], :, :, :][ma.mask == True]
 		else:
 			y_valid[i, :, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :, :][ma.mask == True]
 for i in range(len(y_test)):
@@ -329,9 +325,7 @@ for i in range(len(y_test)):
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
 		if i == 0:
-			needed_shape = y_test[i, :, :, :, :][ma.mask == True].shape
-			zero_vals = np.zeros(needed_shape)
-			y_test[i, :, :, :, :][ma.mask == True] = zero_vals
+			y_test[i, :, :, :, :][ma.mask == True] = x_test[i, [-1], :, :, :][ma.mask == True]
 		else:
 			y_test[i, :, :, :, :][ma.mask == True] = y_test[i-1, :, :, :, :][ma.mask == True]
 

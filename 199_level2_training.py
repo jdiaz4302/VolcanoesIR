@@ -124,10 +124,10 @@ vol_cutoff_indices = []
 vol_cutoff_indices_valid = []
 vol_cutoff_indices_test = []
 vol_name_ls = []
-for vol in os.listdir('VolcanoesIR/data'):
+for vol in os.listdir('data'):
 	### Basic data import ###
-	numpy_data_location = "VolcanoesIR/AST_08_data/" + vol + "/background_subtracted"
-	table_data_location = "VolcanoesIR/data/" + vol + "/good_df.csv"
+	numpy_data_location = "AST_08_data/" + vol + "/background_subtracted"
+	table_data_location = "data/" + vol + "/good_df.csv"
 	volcano_scenes = np.load(numpy_data_location, allow_pickle = True)
 	tabular_metadata = pd.read_csv(table_data_location)
 	### Separate model inputs and outputs

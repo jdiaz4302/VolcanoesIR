@@ -90,7 +90,7 @@ elif model_selection == 'ConvTimeLSTM':
 elif model_selection == 'ConvTimeAwareLSTM':
 	from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
-from helper_fns.efcnt_data import efficient_Dataset
+from helper_fns.efcnt_data_AST08 import efficient_Dataset
 from optimization import ssim
 import numpy.ma as ma
 

@@ -92,6 +92,7 @@ elif model_selection == 'ConvTimeAwareLSTM':
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data import efficient_Dataset
 from optimization import ssim
+import numpy.ma as ma
 
 
 # Setting seed for reproducibility

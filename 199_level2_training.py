@@ -121,6 +121,7 @@ try:
 except ValueError as e:
 	do = 'nothing'
 
+count = 0
 vol_cutoff_indices = []
 vol_cutoff_indices_valid = []
 vol_cutoff_indices_test = []

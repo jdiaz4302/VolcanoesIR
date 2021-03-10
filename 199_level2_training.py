@@ -347,9 +347,9 @@ y_valid = torch.from_numpy(y_valid).type(torch.FloatTensor)
 # Defining model parameters
 # Picking one of the like-sequence tensors within the list to set parameters
 print("Setting up methods")
-channels = x_train.shape[2]
-height = x_train.shape[3]
-width = x_train.shape[4]
+channels = 1
+height = x_train.shape[2]
+width = x_train.shape[3]
 lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=4)
 # Print number of model parameters
 total_params = sum(p.numel() for p in lstm_model.parameters() if p.requires_grad)

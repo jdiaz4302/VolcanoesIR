@@ -239,81 +239,81 @@ for vol in os.listdir('data'):
 for i in range(len(x_train)):
 	for j in range(x_train.shape[1]):
 		# Identifying missing values
-		ma = np.ma.masked_invalid(x_train[i, j, :, :, :])
+		ma = np.ma.masked_invalid(x_train[i, j, :, :])
 		# If the mask found NA values
 		if not np.all(ma.mask == False):
 			# Using previous value to fill
 			if j == 0:
 				if i == 0:
-					needed_shape = x_train[i, j, :, :, :][ma.mask == True].shape
+					needed_shape = x_train[i, j, :, :][ma.mask == True].shape
 					zero_vals = np.zeros(needed_shape)
-					x_train[i, j, :, :, :][ma.mask == True] = zero_vals
+					x_train[i, j, :, :][ma.mask == True] = zero_vals
 				else:
-					x_train[i, j, :, :, :][ma.mask == True] = x_train[i-1, j, :, :, :][ma.mask == True]
-					t_train[i, j, :, :, :][ma.mask == True] = t_train[i, j, :, :, :][ma.mask == True] + t_train[i-1, j, :, :, :][ma.mask == True]
+					x_train[i, j, :, :][ma.mask == True] = x_train[i-1, j, :, :][ma.mask == True]
+					t_train[i, j, :, :][ma.mask == True] = t_train[i, j, :, :][ma.mask == True] + t_train[i-1, j, :, :][ma.mask == True]
 			else:
-				x_train[i, j, :, :, :][ma.mask == True] = x_train[i, j-1, :, :, :][ma.mask == True]
-				t_train[i, j, :, :, :][ma.mask == True] = t_train[i, j, :, :, :][ma.mask == True] + t_train[i, j-1, :, :, :][ma.mask == True]
+				x_train[i, j, :, :][ma.mask == True] = x_train[i, j-1, :, :][ma.mask == True]
+				t_train[i, j, :, :][ma.mask == True] = t_train[i, j, :, :][ma.mask == True] + t_train[i, j-1, :, :][ma.mask == True]
 for i in range(len(x_valid)):
 	for j in range(x_valid.shape[1]):
 		# Identifying missing values
-		ma = np.ma.masked_invalid(x_valid[i, j, :, :, :])
+		ma = np.ma.masked_invalid(x_valid[i, j, :, :])
 		# If the mask found NA values
 		if not np.all(ma.mask == False):
 			# Using previous value to fill
 			if j == 0:
 				if i == 0:
-					needed_shape = x_valid[i, j, :, :, :][ma.mask == True].shape
+					needed_shape = x_valid[i, j, :, :][ma.mask == True].shape
 					zero_vals = np.zeros(needed_shape)
-					x_valid[i, j, :, :, :][ma.mask == True] = zero_vals
+					x_valid[i, j, :, :][ma.mask == True] = zero_vals
 				else:
-					x_valid[i, j, :, :, :][ma.mask == True] = x_valid[i-1, j, :, :, :][ma.mask == True]
-					t_valid[i, j, :, :, :][ma.mask == True] = t_valid[i, j, :, :, :][ma.mask == True] + t_valid[i-1, j, :, :, :][ma.mask == True]
+					x_valid[i, j, :, :][ma.mask == True] = x_valid[i-1, j, :, :][ma.mask == True]
+					t_valid[i, j, :, :][ma.mask == True] = t_valid[i, j, :, :][ma.mask == True] + t_valid[i-1, j, :, :][ma.mask == True]
 			else:
-				x_valid[i, j, :, :, :][ma.mask == True] = x_valid[i, j-1, :, :, :][ma.mask == True]
-				t_valid[i, j, :, :, :][ma.mask == True] = t_valid[i, j, :, :, :][ma.mask == True] + t_valid[i, j-1, :, :, :][ma.mask == True]
+				x_valid[i, j, :, :][ma.mask == True] = x_valid[i, j-1, :, :][ma.mask == True]
+				t_valid[i, j, :, :][ma.mask == True] = t_valid[i, j, :, :][ma.mask == True] + t_valid[i, j-1, :, :][ma.mask == True]
 for i in range(len(x_test)):
 	for j in range(x_test.shape[1]):
 		# Identifying missing values
-		ma = np.ma.masked_invalid(x_test[i, j, :, :, :])
+		ma = np.ma.masked_invalid(x_test[i, j, :, :])
 		# If the mask found NA values
 		if not np.all(ma.mask == False):
 			# Using previous value to fill
 			if j == 0:
 				if i == 0:
-					needed_shape = x_test[i, j, :, :, :][ma.mask == True].shape
+					needed_shape = x_test[i, j, :, :][ma.mask == True].shape
 					zero_vals = np.zeros(needed_shape)
-					x_test[i, j, :, :, :][ma.mask == True] = zero_vals
+					x_test[i, j, :, :][ma.mask == True] = zero_vals
 				else:
-					x_test[i, j, :, :, :][ma.mask == True] = x_test[i-1, j, :, :, :][ma.mask == True]
-					t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i-1, j, :, :, :][ma.mask == True]
+					x_test[i, j, :, :][ma.mask == True] = x_test[i-1, j, :, :][ma.mask == True]
+					t_test[i, j, :, :][ma.mask == True] = t_test[i, j, :, :][ma.mask == True] + t_test[i-1, j, :, :][ma.mask == True]
 			else:
-				x_test[i, j, :, :, :][ma.mask == True] = x_test[i, j-1, :, :, :][ma.mask == True]
-				t_test[i, j, :, :, :][ma.mask == True] = t_test[i, j, :, :, :][ma.mask == True] + t_test[i, j-1, :, :, :][ma.mask == True]
+				x_test[i, j, :, :][ma.mask == True] = x_test[i, j-1, :, :][ma.mask == True]
+				t_test[i, j, :, :][ma.mask == True] = t_test[i, j, :, :][ma.mask == True] + t_test[i, j-1, :, :][ma.mask == True]
 for i in range(len(y_train)):
-	ma = np.ma.masked_invalid(y_train[i, :, :, :, :])
+	ma = np.ma.masked_invalid(y_train[i, :, :, :])
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
 		if i == 0:
-			y_train[i, :, :, :, :][ma.mask == True] = x_train[i, [-1], :, :, :][ma.mask == True]
+			y_train[i, :, :, :][ma.mask == True] = x_train[i, [-1], :, :][ma.mask == True]
 		else:
-			y_train[i, :, :, :, :][ma.mask == True] = y_train[i-1, :, :, :, :][ma.mask == True]
+			y_train[i, :, :, :][ma.mask == True] = y_train[i-1, :, :, :][ma.mask == True]
 for i in range(len(y_valid)):
-	ma = np.ma.masked_invalid(y_valid[i, :, :, :, :])
+	ma = np.ma.masked_invalid(y_valid[i, :, :, :])
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
 		if i == 0:
-			y_valid[i, :, :, :, :][ma.mask == True] = x_valid[i, [-1], :, :, :][ma.mask == True]
+			y_valid[i, :, :, :][ma.mask == True] = x_valid[i, [-1], :, :][ma.mask == True]
 		else:
-			y_valid[i, :, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :, :][ma.mask == True]
+			y_valid[i, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :][ma.mask == True]
 for i in range(len(y_test)):
-	ma = np.ma.masked_invalid(y_test[i, :, :, :, :])
+	ma = np.ma.masked_invalid(y_test[i, :, :, :])
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
 		if i == 0:
-			y_test[i, :, :, :, :][ma.mask == True] = x_test[i, [-1], :, :, :][ma.mask == True]
+			y_test[i, :, :, :][ma.mask == True] = x_test[i, [-1], :, :][ma.mask == True]
 		else:
-			y_test[i, :, :, :, :][ma.mask == True] = y_test[i-1, :, :, :, :][ma.mask == True]
+			y_test[i, :, :, :][ma.mask == True] = y_test[i-1, :, :, :][ma.mask == True]
 
 
 # Scale 0-1

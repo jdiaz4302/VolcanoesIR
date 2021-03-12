@@ -404,6 +404,9 @@ for i in range(epochs):
 		
 		# data loader
 		batch_x, batch_t, batch_y = data
+		batch_x.unsqueeze_(2) # code was originally wrote for 5-band level-1 data
+		batch_t.unsqueeze_(2) # this unsqueeze is just allowing the explicit acknowledgement
+		batch_y.unsqueeze_(2) # that the level-2 data is 1-band deep
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
@@ -494,6 +497,9 @@ with torch.no_grad():
 		
 		# data loader
 		batch_x, batch_t, batch_y = data
+		batch_x.unsqueeze_(2)
+		batch_t.unsqueeze_(2)
+		batch_y.unsqueeze_(2)
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
@@ -573,9 +579,9 @@ np.save('outputs/final_train_loss.npy', np.asarray(train_set_loss))
 with torch.no_grad():
 	count = 0
 	for i in range(len(y_valid)):
-		batch_x = x_valid[[i], :, :, :, :]
-		batch_t = t_valid[[i], :, :, :, :]
-		batch_y = y_valid[[i], :, :, :, :]
+		batch_x = x_valid[[i], :, :, :].unsqueeze(2)
+		batch_t = t_valid[[i], :, :, :].unsqueeze(2)
+		batch_y = y_valid[[i], :, :, :].unsqueeze(2)
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:

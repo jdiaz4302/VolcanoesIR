@@ -407,14 +407,14 @@ for i in range(epochs):
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_x = batch_x.permute(0, 3, 4, 1, 2)
+			batch_x = batch_x.permute(0, 2, 3, 1)
 			x_sh = batch_x.shape
-			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1], x_sh[2], x_sh[3])
 		# Only further processing time in a time-conscious, non-spatial LSTM
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
-			batch_t = batch_t.permute(0, 3, 4, 1, 2)
+			batch_t = batch_t.permute(0, 2, 3, 1)
 			t_sh = batch_t.shape
-			batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
+			batch_t = batch_t.reshape(t_sh[0]*t_sh[1], t_sh[2], t_sh[3])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
@@ -441,8 +441,8 @@ for i in range(epochs):
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
-			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
+			batch_y_hat = batch_y_hat.permute(0, 2, 3, 1)
+		batch_y_hat = batch_y_hat[:, [-1], :, :]
 		
 		# calculate and store the loss
 		batch_loss = loss(batch_y, batch_y_hat)
@@ -497,14 +497,14 @@ with torch.no_grad():
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_x = batch_x.permute(0, 3, 4, 1, 2)
+			batch_x = batch_x.permute(0, 2, 3, 1)
 			x_sh = batch_x.shape
-			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1], x_sh[2], x_sh[3])
 		# Only further processing time in a time-conscious, non-spatial LSTM
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
-			batch_t = batch_t.permute(0, 3, 4, 1, 2)
+			batch_t = batch_t.permute(0, 2, 3, 1)
 			t_sh = batch_t.shape
-			batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
+			batch_t = batch_t.reshape(t_sh[0]*t_sh[1], t_sh[2], t_sh[3])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
@@ -531,8 +531,8 @@ with torch.no_grad():
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
-			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
+			batch_y_hat = batch_y_hat.permute(0, 2, 3, 1)
+		batch_y_hat = batch_y_hat[:, [-1], :, :]
 		
 		# Moving data off GPU now that model has ran
 		batch_y = batch_y.cpu()
@@ -573,20 +573,20 @@ np.save('outputs/final_train_loss.npy', np.asarray(train_set_loss))
 with torch.no_grad():
 	count = 0
 	for i in range(len(y_valid)):
-		batch_x = x_valid[[i], :, :, :, :]
-		batch_t = t_valid[[i], :, :, :, :]
-		batch_y = y_valid[[i], :, :, :, :]
+		batch_x = x_valid[[i], :, :, :]
+		batch_t = t_valid[[i], :, :, :]
+		batch_y = y_valid[[i], :, :, :]
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
-			batch_x = batch_x.permute(0, 3, 4, 1, 2)
+			batch_x = batch_x.permute(0, 2, 3, 1)
 			x_sh = batch_x.shape
-			batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
+			batch_x = batch_x.reshape(x_sh[0]*x_sh[1], x_sh[2], x_sh[3])
 		# Only further processing time in a time-conscious, non-spatial LSTM
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
-			batch_t = batch_t.permute(0, 3, 4, 1, 2)
+			batch_t = batch_t.permute(0, 2, 3, 1)
 			t_sh = batch_t.shape
-			batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
+			batch_t = batch_t.reshape(t_sh[0]*t_sh[1], t_sh[2], t_sh[3])
 			# This next line is fragile to the assumption that
 			# bands have the same sampling time difference
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
@@ -613,8 +613,8 @@ with torch.no_grad():
 			batch_y_hat = batch_y_hat[0][0]
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
 			batch_y_hat = batch_y_hat.reshape(x_sh)
-			batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
-		batch_y_hat = batch_y_hat[:, [-1], :, :, :]
+			batch_y_hat = batch_y_hat.permute(0, 2, 3, 1)
+		batch_y_hat = batch_y_hat[:, [-1], :, :]
 		
 		# Moving data off GPU now that model has ran
 		batch_y = batch_y.cpu()
@@ -653,8 +653,8 @@ with torch.no_grad():
 		else:
 			index_min = vol_cutoff_indices_valid[vol_ID - 1]
 		index_max = vol_cutoff_indices_valid[vol_ID]
-		pred_vol = cpu_y_hat_temps[index_min:index_max, :, :, :, :]
-		true_vol = cpu_y_temps[index_min:index_max, :, :, :, :]
+		pred_vol = cpu_y_hat_temps[index_min:index_max, :, :, :]
+		true_vol = cpu_y_temps[index_min:index_max, :, :, :]
 		vol_loss = loss(pred_vol, true_vol)
 		vol_loss = torch.sqrt(vol_loss)
 		vol_loss = vol_loss.item()

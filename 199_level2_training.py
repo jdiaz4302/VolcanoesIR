@@ -237,7 +237,8 @@ for vol in os.listdir('data'):
 	print('\t\timported ' + str(x_scenes_test.shape[0]) + ' test scenes from ' + vol)
 
 
-# Gap fill missing values with previous ones
+print("Processing data")
+# Gap fill missing values with previous ones or nearest neighbor
 for i in range(len(x_train)):
 	for j in range(x_train.shape[1]):
 		# Identifying missing values
@@ -339,7 +340,6 @@ for i in range(len(y_test)):
 
 # Scale 0-1
 # Also attempts to find NAs and replace with 0s, but those shouldnt exist anymore
-print("Processing data")
 stored_parameters = np.zeros([2, 9])
 x_train, stored_parameters = scale_and_remove_na(x_train, stored_parameters, 0)
 x_valid, stored_parameters = scale_and_remove_na(x_valid, stored_parameters, 1)

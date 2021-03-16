@@ -242,13 +242,19 @@ for i in range(len(x_train)):
 		# Identifying missing values
 		ma = np.ma.masked_invalid(x_train[i, j, :, :])
 		# If the mask found NA values
-		if not np.all(ma.mask == False):
+		if not np.all(x_train[i, j, :, :].mask == False):
 			# Using previous value to fill
 			if j == 0:
-				if i == 0:
-					needed_shape = x_train[i, j, :, :][ma.mask == True].shape
-					zero_vals = np.zeros(needed_shape)
-					x_train[i, j, :, :][ma.mask == True] = zero_vals
+				# Unless there's no previous, then nearest neighbor interpolate
+				if i == 0 or i in vol_cutoff_indices:
+					scene = x_train[i, j, :, :]
+					# Explicitly retrieving good and bad locations from the mask
+					# note that these differ from (x, y) which earlier defined bad pixel locations
+					X, Y = np.mgrid[0:scene.shape[0], 0:scene.shape[1]]
+					xygood = np.array((X[~scene.mask], Y[~scene.mask])).T
+					xybad = np.array((X[scene.mask], Y[scene.mask])).T
+					# Performing the nearest neighbor gap-filling
+					x_train[i, j, :, :][ma.mask == True] = scene[~scene.mask][KDTree(xygood).query(xybad)[1]]
 				else:
 					x_train[i, j, :, :][ma.mask == True] = x_train[i-1, j, :, :][ma.mask == True]
 					t_train[i, j, :, :][ma.mask == True] = t_train[i, j, :, :][ma.mask == True] + t_train[i-1, j, :, :][ma.mask == True]
@@ -263,10 +269,16 @@ for i in range(len(x_valid)):
 		if not np.all(ma.mask == False):
 			# Using previous value to fill
 			if j == 0:
-				if i == 0:
-					needed_shape = x_valid[i, j, :, :][ma.mask == True].shape
-					zero_vals = np.zeros(needed_shape)
-					x_valid[i, j, :, :][ma.mask == True] = zero_vals
+				# Unless there's no previous, then nearest neighbor interpolate
+				if i == 0 or i in vol_cutoff_indices_valid:
+					scene = x_valid[i, j, :, :]
+					# Explicitly retrieving good and bad locations from the mask
+					# note that these differ from (x, y) which earlier defined bad pixel locations
+					X, Y = np.mgrid[0:scene.shape[0], 0:scene.shape[1]]
+					xygood = np.array((X[~scene.mask], Y[~scene.mask])).T
+					xybad = np.array((X[scene.mask], Y[scene.mask])).T
+					# Performing the nearest neighbor gap-filling
+					x_valid[i, j, :, :][ma.mask == True] = scene[~scene.mask][KDTree(xygood).query(xybad)[1]]
 				else:
 					x_valid[i, j, :, :][ma.mask == True] = x_valid[i-1, j, :, :][ma.mask == True]
 					t_valid[i, j, :, :][ma.mask == True] = t_valid[i, j, :, :][ma.mask == True] + t_valid[i-1, j, :, :][ma.mask == True]
@@ -281,10 +293,16 @@ for i in range(len(x_test)):
 		if not np.all(ma.mask == False):
 			# Using previous value to fill
 			if j == 0:
-				if i == 0:
-					needed_shape = x_test[i, j, :, :][ma.mask == True].shape
-					zero_vals = np.zeros(needed_shape)
-					x_test[i, j, :, :][ma.mask == True] = zero_vals
+				# Unless there's no previous, then nearest neighbor interpolate
+				if i == 0 or i in vol_cutoff_indices_test:
+					scene = x_test[i, j, :, :]
+					# Explicitly retrieving good and bad locations from the mask
+					# note that these differ from (x, y) which earlier defined bad pixel locations
+					X, Y = np.mgrid[0:scene.shape[0], 0:scene.shape[1]]
+					xygood = np.array((X[~scene.mask], Y[~scene.mask])).T
+					xybad = np.array((X[scene.mask], Y[scene.mask])).T
+					# Performing the nearest neighbor gap-filling
+					x_test[i, j, :, :][ma.mask == True] = scene[~scene.mask][KDTree(xygood).query(xybad)[1]]
 				else:
 					x_test[i, j, :, :][ma.mask == True] = x_test[i-1, j, :, :][ma.mask == True]
 					t_test[i, j, :, :][ma.mask == True] = t_test[i, j, :, :][ma.mask == True] + t_test[i-1, j, :, :][ma.mask == True]
@@ -292,18 +310,18 @@ for i in range(len(x_test)):
 				x_test[i, j, :, :][ma.mask == True] = x_test[i, j-1, :, :][ma.mask == True]
 				t_test[i, j, :, :][ma.mask == True] = t_test[i, j, :, :][ma.mask == True] + t_test[i, j-1, :, :][ma.mask == True]
 for i in range(len(y_train)):
-	ma = np.ma.masked_invalid(y_train[i, :, :, :])
+	ma = np.ma.masked_invalid(y_train[i, :, :])
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
-		if i == 0:
-			y_train[i, :, :, :][ma.mask == True] = x_train[i, [-1], :, :][ma.mask == True]
+		if i == 0 or i in vol_cutoff_indices: 
+			y_train[i, :, :][ma.mask == True] = x_train[i, [-1], :, :][ma.mask == True]
 		else:
-			y_train[i, :, :, :][ma.mask == True] = y_train[i-1, :, :, :][ma.mask == True]
+			y_train[i, :, :][ma.mask == True] = y_train[i-1, :, :, :][ma.mask == True]
 for i in range(len(y_valid)):
 	ma = np.ma.masked_invalid(y_valid[i, :, :, :])
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
-		if i == 0:
+		if i == 0 or i in vol_cutoff_indices_valid:
 			y_valid[i, :, :, :][ma.mask == True] = x_valid[i, [-1], :, :][ma.mask == True]
 		else:
 			y_valid[i, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :][ma.mask == True]
@@ -311,7 +329,7 @@ for i in range(len(y_test)):
 	ma = np.ma.masked_invalid(y_test[i, :, :, :])
 	# If the mask found NA values
 	if not np.all(ma.mask == False):
-		if i == 0:
+		if i == 0 or i in vol_cutoff_indices_test:
 			y_test[i, :, :, :][ma.mask == True] = x_test[i, [-1], :, :][ma.mask == True]
 		else:
 			y_test[i, :, :, :][ma.mask == True] = y_test[i-1, :, :, :][ma.mask == True]
@@ -578,7 +596,7 @@ with torch.no_grad():
 		vol_loss = loss(pred_vol, true_vol)
 		vol_loss = torch.sqrt(vol_loss)
 		vol_loss = vol_loss.item()
-		print('\t\Training set loss for', vol, ':', vol_loss)
+		print('\t\tTraining set loss for', vol, ':', vol_loss)
 		vol_ID += 1
 
 # Saving the train set loss

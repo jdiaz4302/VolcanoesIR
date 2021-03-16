@@ -560,7 +560,7 @@ with torch.no_grad():
 	train_set_loss = torch.sqrt(train_set_loss)
 	train_set_loss = train_set_loss.item()
 	# print traination set loss
-	print("\tValidation set loss:", train_set_loss)
+	print("\tTraining set loss:", train_set_loss)
 	# Saving the predictions and corresponding truths
 	np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/train_truth.npy", cpu_y_temps.numpy())
@@ -577,7 +577,7 @@ with torch.no_grad():
 		vol_loss = loss(pred_vol, true_vol)
 		vol_loss = torch.sqrt(vol_loss)
 		vol_loss = vol_loss.item()
-		print('\t\tValidation set loss for', vol, ':', vol_loss)
+		print('\t\Training set loss for', vol, ':', vol_loss)
 		vol_ID += 1
 
 # Saving the train set loss

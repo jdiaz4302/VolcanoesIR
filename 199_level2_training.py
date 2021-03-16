@@ -570,8 +570,8 @@ with torch.no_grad():
 		if vol_ID == 0:
 			index_min = 0
 		else:
-			index_min = vol_cutoff_indices_train[vol_ID - 1]
-		index_max = vol_cutoff_indices_train[vol_ID]
+			index_min = vol_cutoff_indices[vol_ID - 1]
+		index_max = vol_cutoff_indices[vol_ID]
 		pred_vol = cpu_y_hat_temps[index_min:index_max, :, :, :, :]
 		true_vol = cpu_y_temps[index_min:index_max, :, :, :, :]
 		vol_loss = loss(pred_vol, true_vol)

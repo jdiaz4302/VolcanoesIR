@@ -488,18 +488,13 @@ torch.cuda.empty_cache()
 print("Beginning evaluation")
 
 
-# Getting the loss value for the whole training set
-# torch.no_grad allows some efficiency by not tracking
-# values for optimization
+# Determine train set performance by volcano
 with torch.no_grad():
 	count = 0
-	for data in train_loader:
-		
-		# data loader
-		batch_x, batch_t, batch_y = data
-		batch_x.unsqueeze_(2)
-		batch_t.unsqueeze_(2)
-		batch_y.unsqueeze_(2)
+	for i in range(len(y_train)):
+		batch_x = x_train[[i], :, :, :].unsqueeze(2)
+		batch_t = t_train[[i], :, :, :].unsqueeze(2)
+		batch_y = y_train[[i], :, :, :].unsqueeze(2)
 		
 		# reshaping data if needed for non-spatial LSTMs
 		if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
@@ -515,15 +510,15 @@ with torch.no_grad():
 			# bands have the same sampling time difference
 		if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 			batch_t = batch_t[:,:,[0]]
-		
+			
+		# move to GPU
 		if model_selection != 'AR':
-			# move to GPU
 			batch_x = batch_x.to(device)
 			# Only move time tensors to GPU if time-conscious LSTM
 			if model_selection not in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 				batch_t = batch_t.to(device)
 			batch_y = batch_y.to(device)
-		
+			
 		# Run the model, determining forward pass based on model selected
 		if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 			batch_y_hat = lstm_model(batch_x)
@@ -545,8 +540,8 @@ with torch.no_grad():
 		batch_y_hat = batch_y_hat.cpu()
 		
 		# Transformating the data to temperature values
-		train_y_min = torch.tensor(stored_parameters[0, 0])
-		train_y_max = torch.tensor(stored_parameters[1, 0])
+		train_y_min = torch.tensor(stored_parameters[0, 1])
+		train_y_max = torch.tensor(stored_parameters[1, 1])
 		batch_y = (batch_y * (train_y_max - train_y_min)) + train_y_min
 		batch_y_hat = (batch_y_hat * (train_y_max - train_y_min)) + train_y_min
 		
@@ -564,14 +559,28 @@ with torch.no_grad():
 	train_set_loss = loss(cpu_y_hat_temps, cpu_y_temps)
 	train_set_loss = torch.sqrt(train_set_loss)
 	train_set_loss = train_set_loss.item()
-	# print training set loss
-	print("\tTraining set loss:", train_set_loss)
+	# print traination set loss
+	print("\tValidation set loss:", train_set_loss)
 	# Saving the predictions and corresponding truths
 	np.save("outputs/train_prediction.npy", cpu_y_hat_temps.numpy())
 	np.save("outputs/train_truth.npy", cpu_y_temps.numpy())
+	
+	vol_ID = 0
+	for vol in vol_name_ls:
+		if vol_ID == 0:
+			index_min = 0
+		else:
+			index_min = vol_cutoff_indices_train[vol_ID - 1]
+		index_max = vol_cutoff_indices_train[vol_ID]
+		pred_vol = cpu_y_hat_temps[index_min:index_max, :, :, :, :]
+		true_vol = cpu_y_temps[index_min:index_max, :, :, :, :]
+		vol_loss = loss(pred_vol, true_vol)
+		vol_loss = torch.sqrt(vol_loss)
+		vol_loss = vol_loss.item()
+		print('\t\tValidation set loss for', vol, ':', vol_loss)
+		vol_ID += 1
 
-
-# Saving the training set loss
+# Saving the train set loss
 np.save('outputs/final_train_loss.npy', np.asarray(train_set_loss))
 
 

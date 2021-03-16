@@ -172,7 +172,7 @@ for vol in os.listdir('data'):
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
 				for j in range(len(dates_i)):
 					time_differences_train[i - num_input_scenes - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
-		elif i < (train_n + out_n + num_input_scenes):
+		elif i < (train_n + out_n + num_input_scenes + 1):
 			# Store the image data
 			x_scenes_valid[i - train_n - num_input_scenes - 1, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
 			y_scenes_valid[i - train_n - num_input_scenes - 1, 0, :, :] = volcano_scenes[i, :, :]

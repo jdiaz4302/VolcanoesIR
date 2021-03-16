@@ -154,7 +154,7 @@ for vol in os.listdir('data'):
 	formatted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in tabular_metadata['dates']]
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
 	#     Also, the first data point wont have a Time-Aware LSTM time value, so it is omitted
-	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes):
+	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes+1):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
 			x_scenes_train[i - num_input_scenes - 1, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
@@ -172,10 +172,10 @@ for vol in os.listdir('data'):
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
 				for j in range(len(dates_i)):
 					time_differences_train[i - num_input_scenes - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
-		elif i < (train_n + out_n + num_input_scenes + 1):
+		elif i < (train_n + out_n + num_input_scenes):
 			# Store the image data
-			x_scenes_valid[i - train_n - num_input_scenes - 1, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
-			y_scenes_valid[i - train_n - num_input_scenes - 1, 0, :, :] = volcano_scenes[i, :, :]
+			x_scenes_valid[i - train_n - num_input_scenes, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
+			y_scenes_valid[i - train_n - num_input_scenes, 0, :, :] = volcano_scenes[i, :, :]
 			# Compute the time differences and store
 			# Time LSTM uses forward-time interval
 			if model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
@@ -191,8 +191,8 @@ for vol in os.listdir('data'):
 					time_differences_valid[i - num_input_scenes - train_n - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
 		else:
 			# Store the image data
-			x_scenes_test[i - train_n - out_n - num_input_scenes - 1, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
-			y_scenes_test[i - train_n - out_n - num_input_scenes - 1, 0, :, :] = volcano_scenes[i, :, :]
+			x_scenes_test[i - train_n - out_n - num_input_scenes, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
+			y_scenes_test[i - train_n - out_n - num_input_scenes, 0, :, :] = volcano_scenes[i, :, :]
 			# Compute the time differences and store
 			# Time LSTM uses forward-time interval
 			if model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
@@ -225,7 +225,7 @@ for vol in os.listdir('data'):
 		y_valid = ma.append(y_valid, y_scenes_valid, axis = 0)
 		x_test = ma.append(x_test, x_scenes_test, axis = 0)
 		t_test = np.append(t_test, time_differences_test, axis = 0)
-		y_test = ma.append(y_test, y_scenes_train, axis = 0)
+		y_test = ma.append(y_test, y_scenes_test, axis = 0)
 	count += 1
 	vol_cutoff_indices.append(y_train.shape[0])
 	vol_cutoff_indices_valid.append(y_valid.shape[0])
@@ -233,6 +233,7 @@ for vol in os.listdir('data'):
 	vol_name_ls.append(vol)
 	print('\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
 	print('\t\timported ' + str(x_scenes_valid.shape[0]) + ' validation scenes from ' + vol)
+	print('\t\timported ' + str(x_scenes_test.shape[0]) + ' test scenes from ' + vol)
 
 
 # Gap fill missing values with previous ones

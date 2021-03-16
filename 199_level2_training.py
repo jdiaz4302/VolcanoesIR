@@ -93,6 +93,7 @@ from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data_AST08 import efficient_Dataset
 from optimization import ssim
 import numpy.ma as ma
+from scipy.spatial import KDTree
 
 
 # Setting seed for reproducibility
@@ -247,6 +248,7 @@ for i in range(len(x_train)):
 			if j == 0:
 				# Unless there's no previous, then nearest neighbor interpolate
 				if i == 0 or i in vol_cutoff_indices:
+					print('\t\tNo prior scene; nearest neighbor interpolation')
 					scene = x_train[i, j, :, :]
 					# Explicitly retrieving good and bad locations from the mask
 					# note that these differ from (x, y) which earlier defined bad pixel locations

@@ -482,7 +482,9 @@ for penalization in l2_regularization_strengths:
 		# Marking the end time and computing difference, also printing epoch information
 		end_time = datetime.now()
 		time_diff = (end_time - begin_time).total_seconds()
-		print('\tEpoch:', i, '\n\t\tMost recent batch loss:', batch_loss.item(), '\n\t\t' + str(time_diff) + ' seconds elapsed')
+		# With l2 regularization iterations, too many prints; only printing every 10 epochs
+		if (i + 1) % 10 == 0:
+			print('\tEpoch:', i, '\n\t\tMost recent batch loss:', batch_loss.item(), '\n\t\t' + str(time_diff) + ' seconds elapsed')
 	loop_end_time = datetime.now()
 	loop_time_diff = (loop_end_time - loop_begin_time).total_seconds()
 	print('\tTotal training-loop time:', loop_time_diff)

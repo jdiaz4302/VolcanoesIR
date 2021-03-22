@@ -697,6 +697,8 @@ for penalization in l2_regularization_strengths:
 
 	# Saving the validation set loss
 	np.save("outputs/final_valid_loss" + str(penalization) + ".npy", np.asarray(valid_set_loss))
-	
 	# Saving the model
 	torch.save(lstm_model, "outputs/model" + str(penalization) + ".pt")
+    
+    # Print breakpoint for human reading between regularization strengths
+    print('\n')

@@ -350,7 +350,7 @@ t_test, stored_parameters = scale_and_remove_na(t_test, stored_parameters, 5)
 y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 6)
 y_valid, stored_parameters = scale_and_remove_na(y_valid, stored_parameters, 7)
 y_test, stored_parameters = scale_and_remove_na(y_test, stored_parameters, 8)
-np.save("outputs/transformation_parameters" + str(penalization) + ".npy", stored_parameters)
+np.save("outputs/transformation_parameters.npy", stored_parameters)
 
 
 # Convert to torch tensors
@@ -412,7 +412,7 @@ loss = torch.nn.MSELoss()
 # Defining many regularization strengths to iterate over to combat overfitting
 l2_regularization_strengths = [0.0001, 0.001, 0.01, 0.1, 1]
 for penalization in l2_regularization_strengths:
-	optimizer = torch.optim.Adam(lstm_model.parameters(), weight_decay = l2)
+	optimizer = torch.optim.Adam(lstm_model.parameters(), weight_decay = penalization)
 	# Training loop
 	print("Beginning training for regularization strength:", penalization)
 	loss_list = []

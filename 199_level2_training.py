@@ -338,22 +338,18 @@ for i in range(len(y_test)):
 			y_test[i, :, :, :][ma.mask == True] = y_test[i-1, :, :, :][ma.mask == True]
 
 
-# Scale 0-1
+# Scale 0-1 using min and max from training set
 # Also attempts to find NAs and replace with 0s, but those shouldnt exist anymore
-stored_parameters = np.zeros([2, 9])
-print(x_train.min(), x_train.max())
-print(np.quantile(x_train, 0.05), np.quantile(x_train, 0.95))
-print(x_valid.min(), x_valid.max())
-print(np.quantile(x_valid, 0.05), np.quantile(x_valid, 0.95))
+stored_parameters = np.zeros([2, 3])
 x_train, stored_parameters = scale_and_remove_na(x_train, stored_parameters, 0)
-x_valid, stored_parameters = scale_and_remove_na(x_valid, stored_parameters, 1)
-x_test, stored_parameters = scale_and_remove_na(x_test, stored_parameters, 2)
-t_train, stored_parameters = scale_and_remove_na(t_train, stored_parameters, 3)
-t_valid, stored_parameters = scale_and_remove_na(t_valid, stored_parameters, 4)
-t_test, stored_parameters = scale_and_remove_na(t_test, stored_parameters, 5)
-y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 6)
-y_valid, stored_parameters = scale_and_remove_na(y_valid, stored_parameters, 7)
-y_test, stored_parameters = scale_and_remove_na(y_test, stored_parameters, 8)
+x_valid = (x_valid - stored_parameters[0, 0]) / (stored_parameters[1, 0] - stored_parameters[0, 0])
+x_test = (x_test - stored_parameters[0, 0]) / (stored_parameters[1, 0] - stored_parameters[0, 0])
+t_train, stored_parameters = scale_and_remove_na(t_train, stored_parameters, 1)
+t_valid = (t_valid - stored_parameters[0, 1]) / (stored_parameters[1, 1] - stored_parameters[0, 1])
+t_test = (t_test - stored_parameters[0, 1]) / (stored_parameters[1, 1] - stored_parameters[0, 1])
+y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 2)
+y_valid = (y_valid - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
+y_test = (y_test - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
 np.save("outputs/transformation_parameters.npy", stored_parameters)
 
 
@@ -563,8 +559,8 @@ for penalization in l2_regularization_strengths:
 			batch_y_hat = batch_y_hat.cpu()
 			
 			# Transformating the data to temperature values
-			train_y_min = torch.tensor(stored_parameters[0, 1])
-			train_y_max = torch.tensor(stored_parameters[1, 1])
+			train_y_min = torch.tensor(stored_parameters[0, 0])
+			train_y_max = torch.tensor(stored_parameters[1, 0])
 			batch_y = (batch_y * (train_y_max - train_y_min)) + train_y_min
 			batch_y_hat = (batch_y_hat * (train_y_max - train_y_min)) + train_y_min
 			
@@ -659,10 +655,10 @@ for penalization in l2_regularization_strengths:
 			batch_y_hat = batch_y_hat.cpu()
 			
 			# Transformating the data to temperature values
-			valid_y_min = torch.tensor(stored_parameters[0, 1])
-			valid_y_max = torch.tensor(stored_parameters[1, 1])
-			batch_y = (batch_y * (valid_y_max - valid_y_min)) + valid_y_min
-			batch_y_hat = (batch_y_hat * (valid_y_max - valid_y_min)) + valid_y_min
+			train_y_min = torch.tensor(stored_parameters[0, 0])
+			train_y_max = torch.tensor(stored_parameters[1, 0])
+			batch_y = (batch_y * (train_y_max - train_y_min)) + train_y_min
+			batch_y_hat = (batch_y_hat * (train_y_max - train_y_min)) + train_y_min
 			
 			# Storing all temperature-valued truths and predictions for
 			# one root mean squared error calculation to get error in

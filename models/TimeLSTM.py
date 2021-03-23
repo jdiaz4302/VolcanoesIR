@@ -1,4 +1,4 @@
-x_and_t_channels_fragile = 5
+x_and_t_channels_fragile = 1
 
 # Adapted from: https://github.com/keitakurita/Practical_NLP_in_PyTorch/blob/master/deep_dives/lstm_from_scratch.ipynb
 import torch

@@ -341,6 +341,10 @@ for i in range(len(y_test)):
 # Scale 0-1
 # Also attempts to find NAs and replace with 0s, but those shouldnt exist anymore
 stored_parameters = np.zeros([2, 9])
+print(x_train.min(), x_train.max())
+print(np.quantile(x_train, 0.05), np.quantile(x_train, 0.95))
+print(x_valid.min(), x_valid.max())
+print(np.quantile(x_valid, 0.05), np.quantile(x_valid, 0.95))
 x_train, stored_parameters = scale_and_remove_na(x_train, stored_parameters, 0)
 x_valid, stored_parameters = scale_and_remove_na(x_valid, stored_parameters, 1)
 x_test, stored_parameters = scale_and_remove_na(x_test, stored_parameters, 2)

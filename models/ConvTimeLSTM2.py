@@ -4,7 +4,7 @@
 
 # Parameter setting that is unique to this data
 # The data is 5 thermal (ASTER) bands
-x_and_t_channels_fragile = 5
+x_and_t_channels_fragile = 1
 # This cannot rely on the self.input_dim parameter
 # because that constantly updates while this should not
 # because it is for the inputs to the T1/T2 gate computations

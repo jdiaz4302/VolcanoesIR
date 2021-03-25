@@ -341,10 +341,13 @@ for i in range(len(y_test)):
 # Performing a log transformation to create a more uniform scale
 #     Further encourage the prediction of extreme values by reducing
 #     the penalty of being wrong with them
-min_for_log_xform = x_train.min()
+min_for_log_xform = -120 # data/domain-driven parameter setting
 x_train = np.log(x_train - min_for_log_xform + 1)
 x_valid = np.log(x_valid - min_for_log_xform + 1)
 x_test = np.log(x_test - min_for_log_xform + 1)
+y_train = np.log(y_train - min_for_log_xform + 1)
+y_valid = np.log(y_valid - min_for_log_xform + 1)
+y_test = np.log(y_test - min_for_log_xform + 1)
 
 
 # Scale 0-1 using min and max from training set

@@ -672,10 +672,14 @@ for penalization in l2_regularization_strengths:
 			batch_y_hat = batch_y_hat.cpu()
 			
 			# Transformating the data to temperature values
+            # Undoing min-max scale
 			train_y_min = torch.tensor(stored_parameters[0, 0])
 			train_y_max = torch.tensor(stored_parameters[1, 0])
 			batch_y = (batch_y * (train_y_max - train_y_min)) + train_y_min
 			batch_y_hat = (batch_y_hat * (train_y_max - train_y_min)) + train_y_min
+			# Undoing log transformation
+			batch_y = np.exp(batch_y) - 1 + min_for_log_xform
+			batch_y_hat = np.exp(batch_y_hat) - 1 + min_for_log_xform
 			
 			# Storing all temperature-valued truths and predictions for
 			# one root mean squared error calculation to get error in

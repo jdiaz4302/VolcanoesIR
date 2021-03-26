@@ -497,6 +497,8 @@ for penalization in l2_regularization_strengths:
 				# computing loss for proportion of hot versus nonhot pixels
 			num_hotspots_loss = prop_loss(y_hat_distrib_array, y_distrib_array)
 			# combine the loss metrics
+			if MSE_loss.is_cuda:
+				num_hotspots_loss = num_hotspots_loss.cuda()
 			batch_loss = MSE_loss + num_hotspots_loss
 			loss_list.append(batch_loss.item())
 			

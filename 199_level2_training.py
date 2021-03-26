@@ -473,31 +473,31 @@ for penalization in l2_regularization_strengths:
 			
 			# calculate and store the MSE loss
 			MSE_loss = loss(batch_y, batch_y_hat)
-            # calculate and store the BCE loss for proportion of hot pixels in each image
-                # create arrays to store prop of hot versus nonhot pixels
-            y_distrib_array = torch.zeros(batch_y.shape[0], 2)
-            y_hat_distrib_array = torch.zeros(batch_y_hat.shape[0], 2)
-                # identify pixels above threshold
-            y_logical_scenes = (batch_y >= scaled_hot_val)
-            y_hat_logical_scenes = (batch_y_hat >= scaled_hot_val)
-                # Sum these pixels spatially for each scene
-            y_logical_scene_flattened = torch.flatten(y_logical_scenes, start_dim = 1, end_dim = 4)
-            y_hat_logical_scene_flattened = torch.flatten(y_hat_logical_scenes, start_dim = 1, end_dim = 4)
-            y_num_hot = torch.sum(y_logical_scene_flattened, dim = 1)
-            y_hat_num_hot = torch.sum(y_hat_logical_scene_flattened, dim = 1)
-                # computer proportion from total number and total possible
-            total_possible = y_logical_scene_flattened.shape[1]
-            y_proportion_hot = torch.div(y_num_hot, float(total_possible))
-            y_hat_proportion_hot = torch.div(y_hat_num_hot, float(total_possible))
-                # filling distribution arrays for y and y_hat
-            y_distrib_array[:, 0] = y_proportion_hot
-            y_distrib_array[:, 1] = 1 - y_proportion_hot
-            y_hat_distrib_array[:, 0] = y_hat_proportion_hot
-            y_hat_distrib_array[:, 1] = 1 - y_hat_proportion_hot
-                # computing loss for proportion of hot versus nonhot pixels
-            num_hotspots_loss = prop_loss(y_hat_distrib_array, y_distrib_array)
-            # combine the loss metrics
-            batch_loss = MSE_loss + num_hotspots_loss
+			# calculate and store the BCE loss for proportion of hot pixels in each image
+				# create arrays to store prop of hot versus nonhot pixels
+			y_distrib_array = torch.zeros(batch_y.shape[0], 2)
+			y_hat_distrib_array = torch.zeros(batch_y_hat.shape[0], 2)
+				# identify pixels above threshold
+			y_logical_scenes = (batch_y >= scaled_hot_val)
+			y_hat_logical_scenes = (batch_y_hat >= scaled_hot_val)
+				# Sum these pixels spatially for each scene
+			y_logical_scene_flattened = torch.flatten(y_logical_scenes, start_dim = 1, end_dim = 4)
+			y_hat_logical_scene_flattened = torch.flatten(y_hat_logical_scenes, start_dim = 1, end_dim = 4)
+			y_num_hot = torch.sum(y_logical_scene_flattened, dim = 1)
+			y_hat_num_hot = torch.sum(y_hat_logical_scene_flattened, dim = 1)
+				# computer proportion from total number and total possible
+			total_possible = y_logical_scene_flattened.shape[1]
+			y_proportion_hot = torch.div(y_num_hot, float(total_possible))
+			y_hat_proportion_hot = torch.div(y_hat_num_hot, float(total_possible))
+				# filling distribution arrays for y and y_hat
+			y_distrib_array[:, 0] = y_proportion_hot
+			y_distrib_array[:, 1] = 1 - y_proportion_hot
+			y_hat_distrib_array[:, 0] = y_hat_proportion_hot
+			y_hat_distrib_array[:, 1] = 1 - y_hat_proportion_hot
+				# computing loss for proportion of hot versus nonhot pixels
+			num_hotspots_loss = prop_loss(y_hat_distrib_array, y_distrib_array)
+			# combine the loss metrics
+			batch_loss = MSE_loss + num_hotspots_loss
 			loss_list.append(batch_loss.item())
 			
 			# update parameters

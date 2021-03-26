@@ -487,8 +487,8 @@ for penalization in l2_regularization_strengths:
 			y_hat_num_hot = torch.sum(y_hat_logical_scene_flattened, dim = 1)
 				# computer proportion from total number and total possible
 			total_possible = y_logical_scene_flattened.shape[1]
-			y_proportion_hot = torch.div(y_num_hot, float(total_possible))
-			y_hat_proportion_hot = torch.div(y_hat_num_hot, float(total_possible))
+			y_proportion_hot = torch.div(y_num_hot.float(), float(total_possible))
+			y_hat_proportion_hot = torch.div(y_hat_num_hot.float(), float(total_possible))
 				# filling distribution arrays for y and y_hat
 			y_distrib_array[:, 0] = y_proportion_hot
 			y_distrib_array[:, 1] = 1 - y_proportion_hot

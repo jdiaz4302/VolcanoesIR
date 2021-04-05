@@ -385,10 +385,10 @@ y_test = y_test_differenced
 # Saving undifferenced for evaluation
 x_train_og.dump("outputs/x_train_undiff.npy")
 y_train_og.dump("outputs/y_train_undiff.npy")
-x_valid_og("outputs/x_valid_undiff.npy")
-y_valid_og("outputs/y_valid_undiff.npy")
-x_test_og("outputs/x_test_undiff.npy")
-y_test_og("outputs/y_test_undiff.npy")
+x_valid_og.dump("outputs/x_valid_undiff.npy")
+y_valid_og.dump("outputs/y_valid_undiff.npy")
+x_test_og.dump("outputs/x_test_undiff.npy")
+y_test_og.dump("outputs/y_test_undiff.npy")
 
 
 # Scale 0-1 using min and max from training set

@@ -360,14 +360,14 @@ y_test_differenced = y_test[1:len(y_test), :, :, :] - y_test[0:len(y_test)-1, :,
 first_valid_differenced = x_valid[[0], :, :, :] - x_train[[-1], :, :, :]
 x_valid_differenced = np.concatenate([first_valid_differenced, x_valid_differenced], axis = 0)
 #   Y
-first_valid_differenced_y = y_valid[[0], :, :, :] - x_valid[[-1], [-1], :, :, :]
+first_valid_differenced_y = y_valid[[0], :, :, :] - x_valid[[-1], [-1], :, :]
 y_valid_differenced = np.concatenate([first_valid_differenced_y, y_valid_differenced], axis = 0)
 # Test
 #   X
 first_test_differenced = x_test[[0], :, :, :] - x_valid[[-1], :, :, :]
 x_test_differenced = np.concatenate([first_test_differenced, x_test_differenced], axis = 0)
 #   Y
-first_test_differenced_y = y_test[[0], :, :, :] - x_test[[-1], [-1], :, :, :]
+first_test_differenced_y = y_test[[0], :, :, :] - x_test[[-1], [-1], :, :]
 y_test_differenced = np.concatenate([first_test_differenced_y, y_test_differenced], axis = 0)
 # Replacing state values with differenced values
 x_train_og = x_train

@@ -350,7 +350,7 @@ t_test = (t_test - stored_parameters[0, 1]) / (stored_parameters[1, 1] - stored_
 y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 2)
 y_valid = (y_valid - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
 y_test = (y_test - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
-hot_val = 20 # domain-knowledge from Reath et al. 2019 (The AVTOD...)
+hot_val = 50 # domain-knowledge from Reath et al. 2019 (The AVTOD...)
 scaled_hot_val = (hot_val - stored_parameters[0, 0]) / (stored_parameters[1, 0] - stored_parameters[0, 0])
 np.save("outputs/transformation_parameters.npy", stored_parameters)
 

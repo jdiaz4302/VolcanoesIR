@@ -383,12 +383,12 @@ y_train = y_train_differenced
 y_valid = y_valid_differenced
 y_test = y_test_differenced
 # Saving undifferenced for evaluation
-np.save("outputs/x_train_undiff.npy", x_train_og)
-np.save("outputs/y_train_undiff.npy", y_train_og)
-np.save("outputs/x_valid_undiff.npy", x_valid_og)
-np.save("outputs/y_valid_undiff.npy", y_valid_og)
-np.save("outputs/x_test_undiff.npy", x_test_og)
-np.save("outputs/y_test_undiff.npy", y_test_og)
+x_train_og.dump("outputs/x_train_undiff.npy")
+y_train_og.dump("outputs/y_train_undiff.npy")
+x_valid_og("outputs/x_valid_undiff.npy")
+y_valid_og("outputs/y_valid_undiff.npy")
+x_test_og("outputs/x_test_undiff.npy")
+y_test_og("outputs/y_test_undiff.npy")
 
 
 # Scale 0-1 using min and max from training set

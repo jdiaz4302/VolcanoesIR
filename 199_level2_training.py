@@ -350,8 +350,6 @@ t_test = (t_test - stored_parameters[0, 1]) / (stored_parameters[1, 1] - stored_
 y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 2)
 y_valid = (y_valid - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
 y_test = (y_test - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
-hot_val = 50 # domain-knowledge from Reath et al. 2019 (The AVTOD...)
-scaled_hot_val = (hot_val - stored_parameters[0, 0]) / (stored_parameters[1, 0] - stored_parameters[0, 0])
 np.save("outputs/transformation_parameters.npy", stored_parameters)
 
 
@@ -410,7 +408,7 @@ if model_selection != 'AR':
 
 
 # Setting optimization methods
-loss = torch.nn.MSELoss(); prop_loss = torch.nn.BCELoss()
+loss = torch.nn.MSELoss()
 # Defining many regularization strengths to iterate over to combat overfitting
 l2_regularization_strengths = [0.0001, 0.001, 0.01, 0.1, 1]
 for penalization in l2_regularization_strengths:
@@ -471,35 +469,8 @@ for penalization in l2_regularization_strengths:
 				batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 			batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 			
-			# calculate and store the MSE loss
-			MSE_loss = loss(batch_y, batch_y_hat)
-			# calculate and store the BCE loss for proportion of hot pixels in each image
-				# create arrays to store prop of hot versus nonhot pixels
-			y_distrib_array = torch.zeros(batch_y.shape[0], 2)
-			y_hat_distrib_array = torch.zeros(batch_y_hat.shape[0], 2)
-				# identify pixels above threshold
-			y_logical_scenes = (batch_y >= scaled_hot_val)
-			y_hat_logical_scenes = (batch_y_hat >= scaled_hot_val)
-				# Sum these pixels spatially for each scene
-			y_logical_scene_flattened = torch.flatten(y_logical_scenes, start_dim = 1, end_dim = 4)
-			y_hat_logical_scene_flattened = torch.flatten(y_hat_logical_scenes, start_dim = 1, end_dim = 4)
-			y_num_hot = torch.sum(y_logical_scene_flattened, dim = 1)
-			y_hat_num_hot = torch.sum(y_hat_logical_scene_flattened, dim = 1)
-				# computer proportion from total number and total possible
-			total_possible = y_logical_scene_flattened.shape[1]
-			y_proportion_hot = torch.div(y_num_hot.float(), float(total_possible))
-			y_hat_proportion_hot = torch.div(y_hat_num_hot.float(), float(total_possible))
-				# filling distribution arrays for y and y_hat
-			y_distrib_array[:, 0] = y_proportion_hot
-			y_distrib_array[:, 1] = 1 - y_proportion_hot
-			y_hat_distrib_array[:, 0] = y_hat_proportion_hot
-			y_hat_distrib_array[:, 1] = 1 - y_hat_proportion_hot
-				# computing loss for proportion of hot versus nonhot pixels
-			num_hotspots_loss = prop_loss(y_hat_distrib_array, y_distrib_array)
-			# combine the loss metrics
-			if MSE_loss.is_cuda:
-				num_hotspots_loss = num_hotspots_loss.cuda()
-			batch_loss = MSE_loss + num_hotspots_loss
+			# calculate and store the loss
+			batch_loss = loss(batch_y, batch_y_hat)
 			loss_list.append(batch_loss.item())
 			
 			# update parameters

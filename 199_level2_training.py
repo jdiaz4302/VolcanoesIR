@@ -52,7 +52,7 @@
 # Gathering function inputs
 model_selection = input("Which model do you select?")
 print('Model selected:', model_selection)
-assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM', 'ConvTimeLSTMUnet'])
 training_data_set = input("Which set of training data do you want to use?")
 print('Training data set:', training_data_set)
 n_layers = int(input("Enter number of layers: ")) 
@@ -110,7 +110,7 @@ assert((training_data_set in volcanoes) or (training_data_set == "all"))
 
 # Training parameters
 # This needs to actually be variable, will do with later exploration
-batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':84, 'TimeLSTM':46, 'Time-Aware LSTM':70, 'ConvLSTM':24, 'ConvTimeLSTM':32, 'ConvTimeAwareLSTM':60}
+batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':84, 'TimeLSTM':46, 'Time-Aware LSTM':70, 'ConvLSTM':24, 'ConvTimeLSTM':32, 'ConvTimeAwareLSTM':60, 'ConvTimeLSTMUnet':32}
 lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
 batch_size = batch_size_dict[model_selection]
 num_input_scenes = lag_dict[training_data_set]

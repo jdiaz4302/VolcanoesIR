@@ -470,7 +470,7 @@ for penalization in l2_regularization_strengths:
 			batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 			
 			# calculate and store the loss
-			batch_loss = ssim.ssim(batch_y[:, 0], batch_y_hat[:, 0]) # evaluating SSIM loss instead of MSE
+			batch_loss = loss(batch_y[:, 0], batch_y_hat[:, 0])
 			loss_list.append(batch_loss.item())
 			
 			# update parameters

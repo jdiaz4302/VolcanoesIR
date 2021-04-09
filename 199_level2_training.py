@@ -89,6 +89,8 @@ elif model_selection == 'ConvTimeLSTM':
 	from models.ConvTimeLSTM2 import ConvTime_LSTM2 as LSTM_Model
 elif model_selection == 'ConvTimeAwareLSTM':
 	from models.ConvTimeAwareLSTM2 import ConvTimeAware_LSTM as LSTM_Model
+elif model_selection == 'ConvTimeLSTMUnet':
+    from models.ConvTimeLSTMUnet import ConvTime_LSTM2_Unet as LSTM_Model
 from helper_fns.processing import scale_and_remove_na
 from helper_fns.efcnt_data_AST08 import efficient_Dataset
 from optimization import ssim
@@ -470,7 +472,7 @@ for penalization in l2_regularization_strengths:
 			batch_y_hat = batch_y_hat[:, [-1], :, :, :]
 			
 			# calculate and store the loss
-			batch_loss = loss(batch_y[:, 0], batch_y_hat[:, 0])
+			batch_loss = loss(batch_y, batch_y_hat)
 			loss_list.append(batch_loss.item())
 			
 			# update parameters

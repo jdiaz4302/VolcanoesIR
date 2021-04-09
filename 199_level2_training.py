@@ -460,7 +460,7 @@ for penalization in l2_regularization_strengths:
 				batch_y_hat = lstm_model(batch_x)
 			elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 				batch_y_hat = lstm_model(batch_x, batch_t)
-			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
+			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM', 'ConvTimeLSTMUnet']:
 				batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 			
 			# Extracting the target prediction based on model output
@@ -545,7 +545,7 @@ for penalization in l2_regularization_strengths:
 				batch_y_hat = lstm_model(batch_x)
 			elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 				batch_y_hat = lstm_model(batch_x, batch_t)
-			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
+			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM', 'ConvTimeLSTMUnet']:
 				batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 			
 			# Extracting the target prediction based on model output
@@ -641,7 +641,7 @@ for penalization in l2_regularization_strengths:
 				batch_y_hat = lstm_model(batch_x)
 			elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
 				batch_y_hat = lstm_model(batch_x, batch_t)
-			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
+			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM', 'ConvTimeLSTMUnet']:
 				batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
 			
 			# Extracting the target prediction based on model output

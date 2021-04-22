@@ -49,18 +49,33 @@
 # in 4 GPUs with 11 GB of RAM each
 
 
+import argparse
+
+parser = argparse.ArgumentParser(description='level2 training')
+parser.add_argument('--model_selection', type=str, help='model')
+parser.add_argument('--training_data_set', type=str, help='training_data_set')
+parser.add_argument('--n_layers', type=int, help='n_layers')
+parser.add_argument('--hidden_dim_ls', type=list, help='hidden_dim_ls')
+args = parser.parse_args()
+
+model_selection = args.model
+training_data_set = args.training_data_set
+n_layers = args.n_layers
+hidden_dim_ls = args.hidden_dim_ls
+
+
 # Gathering function inputs
-model_selection = input("Which model do you select?")
+### model_selection = input("Which model do you select?")
 print('Model selected:', model_selection)
 assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM', 'ConvTimeLSTMUnet'])
-training_data_set = input("Which set of training data do you want to use?")
+### training_data_set = input("Which set of training data do you want to use?")
 print('Training data set:', training_data_set)
-n_layers = int(input("Enter number of layers: ")) 
+### n_layers = int(input("Enter number of layers: ")) 
 hidden_dim_ls = []
 # iterating till the range 
-for i in range(n_layers): 
-	layer_dim = int(input()) 
-	hidden_dim_ls.append(layer_dim)
+### for i in range(n_layers): 
+### 	layer_dim = int(input()) 
+### 	hidden_dim_ls.append(layer_dim)
 print('Hidden layers:', hidden_dim_ls)
 
 

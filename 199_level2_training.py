@@ -55,7 +55,7 @@ parser = argparse.ArgumentParser(description='level2 training')
 parser.add_argument('--model_selection', type=str, help='model')
 parser.add_argument('--training_data_set', type=str, help='training_data_set')
 parser.add_argument('--n_layers', type=int, help='n_layers')
-parser.add_argument('--hidden_dim_ls', action='append', help='hidden_dim_ls')
+parser.add_argument('--hidden_dim_ls', nargs='+', type=int, help='hidden_dim_ls')
 args = parser.parse_args()
 
 model_selection = args.model_selection

@@ -55,10 +55,10 @@ parser = argparse.ArgumentParser(description='level2 training')
 parser.add_argument('--model_selection', type=str, help='model')
 parser.add_argument('--training_data_set', type=str, help='training_data_set')
 parser.add_argument('--n_layers', type=int, help='n_layers')
-parser.add_argument('--hidden_dim_ls', type=list, help='hidden_dim_ls')
+parser.add_argument('--hidden_dim_ls', action='append', help='hidden_dim_ls')
 args = parser.parse_args()
 
-model_selection = args.model
+model_selection = args.model_selection
 training_data_set = args.training_data_set
 n_layers = args.n_layers
 hidden_dim_ls = args.hidden_dim_ls
@@ -71,7 +71,7 @@ assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'Time-Aware LST
 ### training_data_set = input("Which set of training data do you want to use?")
 print('Training data set:', training_data_set)
 ### n_layers = int(input("Enter number of layers: ")) 
-hidden_dim_ls = []
+### hidden_dim_ls = []
 # iterating till the range 
 ### for i in range(n_layers): 
 ### 	layer_dim = int(input()) 
@@ -388,7 +388,7 @@ print("Setting up methods")
 channels = 1
 height = x_train.shape[2]
 width = x_train.shape[3]
-lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=4)
+lstm_model = LSTM_Model(input_dim=channels,hidden_dim=hidden_dim_ls,GPU=True,input_size=(height,width),num_layers=n_layers)
 # Print number of model parameters
 total_params = sum(p.numel() for p in lstm_model.parameters() if p.requires_grad)
 print('\tTotal number of model parameters:', total_params)

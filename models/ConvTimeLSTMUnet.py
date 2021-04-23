@@ -187,7 +187,7 @@ class ConvTime_LSTM2_Unet(nn.Module):
 
         # Make sure that both `kernel_size` and `hidden_dim` are lists having len == num_layers
         hidden_dim  = self._extend_for_multilayer(hidden_dim, num_layers)
-        kernel_size = self._extend_for_multilayer(kernel_size, num_layers); print(kernel_size, hidden_dim, num_layers)
+        kernel_size = self._extend_for_multilayer(kernel_size, num_layers)
         if not len(kernel_size) == len(hidden_dim) == num_layers:
             raise ValueError('Inconsistent list length.')
 

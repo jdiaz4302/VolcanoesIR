@@ -21,14 +21,14 @@
 #     1) "LSTM"
 #     2 LSTM variants that handle irregular time intervals
 #         * "Time-LSTM"
-#         * "Time-Aware LSTM"
+#         * "TimeAwareLSTM"
 #     3) Convolutional LSTM (that allows images sequences)
 #         * "ConvLSTM"
 #     4) New/proposed models that allow image sequences that are
 #        irregular through time
 #         * Convolutional LSTM + Time-LSTM
 #             - "ConvTimeLSTM"
-#         * Convolutional LSTM + Time-Aware LSTM
+#         * Convolutional LSTM + TimeAwareLSTM
 #             - "ConvTimeAwareLSTM"
 # The quoted keyword-names are the required input for this argument and will
 # select which neural network is trained; this in turn affects preprocessing
@@ -67,7 +67,7 @@ hidden_dim_ls = args.hidden_dim_ls
 # Gathering function inputs
 ### model_selection = input("Which model do you select?")
 print('Model selected:', model_selection)
-assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM', 'ConvTimeLSTMUnet'])
+assert(model_selection in ['Identity', 'AR', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM', 'ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM', 'ConvTimeLSTMUnet'])
 ### training_data_set = input("Which set of training data do you want to use?")
 print('Training data set:', training_data_set)
 ### n_layers = int(input("Enter number of layers: ")) 
@@ -96,7 +96,7 @@ elif model_selection == 'AR':
 	from models.AR import AR as LSTM_Model
 elif model_selection == 'TimeLSTM':
 	from models.TimeLSTM import StackedTimeLSTM as LSTM_Model
-elif model_selection == 'Time-Aware LSTM':
+elif model_selection == 'TimeAwareLSTM':
 	from models.TimeAwareLSTM import StackedTimeAwareLSTM as LSTM_Model
 elif model_selection == 'ConvLSTM':
 	from models.ConvLSTM import ConvLSTM as LSTM_Model
@@ -125,9 +125,9 @@ assert((training_data_set in volcanoes) or (training_data_set == "all"))
 
 # Training parameters
 # This needs to actually be variable, will do with later exploration
-batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':84, 'TimeLSTM':46, 'Time-Aware LSTM':70, 'ConvLSTM':24, 'ConvTimeLSTM':32, 'ConvTimeAwareLSTM':60, 'ConvTimeLSTMUnet':32}
+### batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':84, 'TimeLSTM':46, 'TimeAwareLSTM':70, 'ConvLSTM':24, 'ConvTimeLSTM':32, 'ConvTimeAwareLSTM':60, 'ConvTimeLSTMUnet':32}
 lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
-batch_size = batch_size_dict[model_selection]
+batch_size = 4 # Need something to work for all configurations
 num_input_scenes = lag_dict[training_data_set]
 train_percent = 0.70
 out_samp_perc = 0.15
@@ -156,7 +156,7 @@ for vol in os.listdir('data'):
 	out_n = int(np.floor((len(volcano_scenes) - num_input_scenes)*out_samp_perc))
 	# For every data partition
 	# Array for the prior scenes
-	#   "train_n - 1" is to remove the first scene that wont have an associated Time-Aware LSTM time interval
+	#   "train_n - 1" is to remove the first scene that wont have an associated TimeAwareLSTM time interval
 	x_scenes_train = ma.zeros([train_n - 1, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2]])
 	x_scenes_valid = ma.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2]])
 	x_scenes_test = ma.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2]])
@@ -171,7 +171,7 @@ for vol in os.listdir('data'):
 	# Formatting the string dates as datetime objects
 	formatted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in tabular_metadata['dates']]
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
-	#     Also, the first data point wont have a Time-Aware LSTM time value, so it is omitted
+	#     Also, the first data point wont have a TimeAwareLSTM time value, so it is omitted
 	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes+1):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
@@ -184,7 +184,7 @@ for vol in os.listdir('data'):
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				for j in range(len(dates_i_plus_1)):
 					time_differences_train[i - num_input_scenes - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
-			# While Time-Aware LSTM uses backwards-time interval
+			# While TimeAwareLSTM uses backwards-time interval
 			else:
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
@@ -201,7 +201,7 @@ for vol in os.listdir('data'):
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				for j in range(len(dates_i_plus_1)):
 					time_differences_valid[i - num_input_scenes - train_n - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
-			# While Time-Aware LSTM uses backwards-time interval
+			# While TimeAwareLSTM uses backwards-time interval
 			else:
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
@@ -218,7 +218,7 @@ for vol in os.listdir('data'):
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				for j in range(len(dates_i_plus_1)):
 					time_differences_test[i - num_input_scenes - train_n - out_n - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
-			# While Time-Aware LSTM uses backwards-time interval
+			# While TimeAwareLSTM uses backwards-time interval
 			else:
 				dates_i = formatted_dates[(i - num_input_scenes):i]
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
@@ -448,18 +448,18 @@ for penalization in l2_regularization_strengths:
 			batch_y.unsqueeze_(2) # that the level-2 data is 1-band deep
 			
 			# reshaping data if needed for non-spatial LSTMs
-			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM']:
 				batch_x = batch_x.permute(0, 3, 4, 1, 2)
 				x_sh = batch_x.shape
 				batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
 			# Only further processing time in a time-conscious, non-spatial LSTM
-			if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['TimeLSTM', 'TimeAwareLSTM']:
 				batch_t = batch_t.permute(0, 3, 4, 1, 2)
 				t_sh = batch_t.shape
 				batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
 				# This next line is fragile to the assumption that
 				# bands have the same sampling time difference
-			if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
+			if model_selection in ['TimeLSTM', 'TimeAwareLSTM', 'ConvTimeAwareLSTM']:
 				batch_t = batch_t[:,:,[0]]
 			
 			# move to GPU
@@ -473,7 +473,7 @@ for penalization in l2_regularization_strengths:
 			# Run the model, determining forward pass based on model selected
 			if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 				batch_y_hat = lstm_model(batch_x)
-			elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
+			elif model_selection in ['TimeAwareLSTM', 'ConvTimeAwareLSTM']:
 				batch_y_hat = lstm_model(batch_x, batch_t)
 			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM', 'ConvTimeLSTMUnet']:
 				batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
@@ -481,7 +481,7 @@ for penalization in l2_regularization_strengths:
 			# Extracting the target prediction based on model output
 			if model_selection not in ['AR', 'Identity']:
 				batch_y_hat = batch_y_hat[0][0]
-			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM']:
 				batch_y_hat = batch_y_hat.reshape(x_sh)
 				batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 			batch_y_hat = batch_y_hat[:, [-1], :, :, :]
@@ -533,18 +533,18 @@ for penalization in l2_regularization_strengths:
 			batch_y = y_train[[i], :, :, :].unsqueeze(2)
 			
 			# reshaping data if needed for non-spatial LSTMs
-			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM']:
 				batch_x = batch_x.permute(0, 3, 4, 1, 2)
 				x_sh = batch_x.shape
 				batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
 			# Only further processing time in a time-conscious, non-spatial LSTM
-			if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['TimeLSTM', 'TimeAwareLSTM']:
 				batch_t = batch_t.permute(0, 3, 4, 1, 2)
 				t_sh = batch_t.shape
 				batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
 				# This next line is fragile to the assumption that
 				# bands have the same sampling time difference
-			if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
+			if model_selection in ['TimeLSTM', 'TimeAwareLSTM', 'ConvTimeAwareLSTM']:
 				batch_t = batch_t[:,:,[0]]
 				
 			# move to GPU
@@ -558,7 +558,7 @@ for penalization in l2_regularization_strengths:
 			# Run the model, determining forward pass based on model selected
 			if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 				batch_y_hat = lstm_model(batch_x)
-			elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
+			elif model_selection in ['TimeAwareLSTM', 'ConvTimeAwareLSTM']:
 				batch_y_hat = lstm_model(batch_x, batch_t)
 			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM', 'ConvTimeLSTMUnet']:
 				batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
@@ -566,7 +566,7 @@ for penalization in l2_regularization_strengths:
 			# Extracting the target prediction based on model output
 			if model_selection not in ['AR', 'Identity']:
 				batch_y_hat = batch_y_hat[0][0]
-			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM']:
 				batch_y_hat = batch_y_hat.reshape(x_sh)
 				batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 			batch_y_hat = batch_y_hat[:, [-1], :, :, :]
@@ -629,18 +629,18 @@ for penalization in l2_regularization_strengths:
 			batch_y = y_valid[[i], :, :, :].unsqueeze(2)
 			
 			# reshaping data if needed for non-spatial LSTMs
-			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM']:
 				batch_x = batch_x.permute(0, 3, 4, 1, 2)
 				x_sh = batch_x.shape
 				batch_x = batch_x.reshape(x_sh[0]*x_sh[1]*x_sh[2], x_sh[3], x_sh[4])
 			# Only further processing time in a time-conscious, non-spatial LSTM
-			if model_selection in ['TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['TimeLSTM', 'TimeAwareLSTM']:
 				batch_t = batch_t.permute(0, 3, 4, 1, 2)
 				t_sh = batch_t.shape
 				batch_t = batch_t.reshape(t_sh[0]*t_sh[1]*t_sh[2], t_sh[3], t_sh[4])
 				# This next line is fragile to the assumption that
 				# bands have the same sampling time difference
-			if model_selection in ['TimeLSTM', 'Time-Aware LSTM', 'ConvTimeAwareLSTM']:
+			if model_selection in ['TimeLSTM', 'TimeAwareLSTM', 'ConvTimeAwareLSTM']:
 				batch_t = batch_t[:,:,[0]]
 				
 			# move to GPU
@@ -654,7 +654,7 @@ for penalization in l2_regularization_strengths:
 			# Run the model, determining forward pass based on model selected
 			if model_selection in ['AR', 'Identity', 'LSTM', 'ConvLSTM']:
 				batch_y_hat = lstm_model(batch_x)
-			elif model_selection in ['Time-Aware LSTM', 'ConvTimeAwareLSTM']:
+			elif model_selection in ['TimeAwareLSTM', 'ConvTimeAwareLSTM']:
 				batch_y_hat = lstm_model(batch_x, batch_t)
 			elif model_selection in ['TimeLSTM', 'ConvTimeLSTM', 'ConvTimeLSTMUnet']:
 				batch_y_hat = lstm_model(batch_x, batch_x, batch_t)
@@ -662,7 +662,7 @@ for penalization in l2_regularization_strengths:
 			# Extracting the target prediction based on model output
 			if model_selection not in ['AR', 'Identity']:
 				batch_y_hat = batch_y_hat[0][0]
-			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'Time-Aware LSTM']:
+			if model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM']:
 				batch_y_hat = batch_y_hat.reshape(x_sh)
 				batch_y_hat = batch_y_hat.permute(0, 3, 4, 1, 2)
 			batch_y_hat = batch_y_hat[:, [-1], :, :, :]

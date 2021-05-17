@@ -170,6 +170,13 @@ for vol in os.listdir('data'):
 	table_data_location = "data/" + vol + "/good_df.csv"
 	volcano_scenes = np.load(numpy_data_location, allow_pickle = True)
 	tabular_metadata = pd.read_csv(table_data_location)
+	### Taking care of the unretrievable scenes for Erebus ###
+    ### This should always be done when referencing processed data (AST_08_data) with metadata (data) ###
+	if vol == 'Erebus':
+		tabular_metadata['acquisition_datetimes'] = [file.split('_')[2] for file in tabular_metadata['nighttime_volcano_files']]
+		tabular_metadata = tabular_metadata[tabular_metadata.acquisition_datetimes != '00304102013143221'] 
+		tabular_metadata = tabular_metadata[tabular_metadata.acquisition_datetimes != '00308162018142109']
+		tabular_metadata = tabular_metadata.reset_index()
 	### Separate model inputs and outputs
 	# Determine number in each partition
 	train_n = int(np.floor((len(volcano_scenes) - num_input_scenes)*train_percent))

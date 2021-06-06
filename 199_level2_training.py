@@ -129,22 +129,27 @@ assert(hidden_dim_ls[0] in [2000, 1028, 128, 64])
 if hidden_dim_ls[0] == 2000: # [2000, 2000, 1]
     assert(model_selection in ['AR', 'Identity', 'LSTM', 'TimeLSTM', 'TimeAwareLSTM'])
     # batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':4, 'TimeLSTM':2, 'TimeAwareLSTM':2}
-    batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':12, 'TimeLSTM':6, 'TimeAwareLSTM':6}
+    batch_size_dict = {'AR':84, 'Identity':84, 'LSTM':24, 'TimeLSTM':15, 'TimeAwareLSTM':15}
     batch_size = batch_size_dict[model_selection]
 if hidden_dim_ls[0] == 1028: # [1028, 512, 1]
     assert(model_selection in ['LSTM', 'TimeLSTM', 'TimeAwareLSTM'])
     # batch_size_dict = {'LSTM':12, 'TimeLSTM':6, 'TimeAwareLSTM':10}
     batch_size_dict = {'LSTM':36, 'TimeLSTM':18, 'TimeAwareLSTM':30}
     batch_size = batch_size_dict[model_selection]
-if hidden_dim_ls[0] == 128: # [128, 1]
-    assert(model_selection in ['LSTM', 'TimeLSTM', 'TimeAwareLSTM'])
-    # batch_size_dict = {'LSTM':128, 'TimeLSTM':80, 'TimeAwareLSTM':114}
-    batch_size_dict = {'LSTM':360, 'TimeLSTM':224, 'TimeAwareLSTM':320}
-    batch_size = batch_size_dict[model_selection]
+if hidden_dim_ls[0] == 128: 
+    if hidden_dim_ls[1] == 64: # [128, 64, 64, 1] for ConvLSTMs
+        assert(model_selection in ['ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM'])
+        batch_size_dict = {'ConvLSTM':320, 'ConvTimeLSTM':216, 'ConvTimeAwareLSTM':320}
+        batch_size = batch_size_dict[model_selection]
+    else: # [128, 1] for LSTMs
+        assert(model_selection in ['LSTM', 'TimeLSTM', 'TimeAwareLSTM'])
+        # batch_size_dict = {'LSTM':128, 'TimeLSTM':80, 'TimeAwareLSTM':114}
+        batch_size_dict = {'LSTM':360, 'TimeLSTM':224, 'TimeAwareLSTM':320}
+        batch_size = batch_size_dict[model_selection]
 if hidden_dim_ls[0] == 64: # [64, 64, 1]; [64, 128, 64, 1] for Unet
     assert(model_selection in ['ConvLSTM', 'ConvTimeLSTM', 'ConvTimeAwareLSTM', 'ConvTimeLSTMUnet'])
     # batch_size_dict = {'ConvLSTM':108, 'ConvTimeLSTM':76, 'ConvTimeAwareLSTM':124, 'ConvTimeLSTMUnet':36}
-    batch_size_dict = {'ConvLSTM':324, 'ConvTimeLSTM':216, 'ConvTimeAwareLSTM':352, 'ConvTimeLSTMUnet':96}
+    batch_size_dict = {'ConvLSTM':320, 'ConvTimeLSTM':216, 'ConvTimeAwareLSTM':352, 'ConvTimeLSTMUnet':80}
     batch_size = batch_size_dict[model_selection]
 lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
 

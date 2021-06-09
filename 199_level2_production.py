@@ -153,7 +153,7 @@ if hidden_dim_ls[0] == 64: # [64, 64, 1]; [64, 128, 64, 1] for Unet
 	# batch_size_dict = {'ConvLSTM':108, 'ConvTimeLSTM':76, 'ConvTimeAwareLSTM':124, 'ConvTimeLSTMUnet':36}
 	batch_size_dict = {'ConvLSTM':320, 'ConvTimeLSTM':216, 'ConvTimeAwareLSTM':352, 'ConvTimeLSTMUnet':80}
 	batch_size = batch_size_dict[model_selection]
-lag_dict = {"all":6, "ErtaAle":9, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":4, "Puuoo":8}
+lag_dict = {"all":6, "Erebus":3, "ErtaAle":9, "Etna":3, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":3, "Puuoo":4}
 
 num_input_scenes = lag_dict[training_data_set]
 train_percent = 0.70
@@ -473,7 +473,7 @@ optimizer = torch.optim.Adam(lstm_model.parameters(), weight_decay = penalizatio
 print("Beginning training for regularization strength:", penalization)
 loss_list = []
 #epochs = int(np.ceil((7*10**5) / x_train.shape[0]))
-epochs = 1000
+epochs = 100
 loop_begin_time = datetime.now()
 for i in range(epochs):
 	# Marking the beginning time of epoch

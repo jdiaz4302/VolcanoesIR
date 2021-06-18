@@ -156,7 +156,7 @@ if hidden_dim_ls[0] == 64: # [64, 64, 1]; [64, 128, 64, 1] for Unet
 lag_dict = {"all":6, "Erebus":3, "ErtaAle":9, "Etna":3, "Kilauea":10, "Masaya":3, "Nyamuragira":3, "Nyiragongo":3, "Pacaya":3, "Puuoo":4}
 
 num_input_scenes = lag_dict[training_data_set]
-train_percent = 0.70
+train_percent = 0.85
 out_samp_perc = 0.15
 
 
@@ -168,7 +168,6 @@ except ValueError as e:
 
 count = 0
 vol_cutoff_indices = []
-vol_cutoff_indices_valid = []
 vol_cutoff_indices_test = []
 vol_name_ls = []
 for vol in os.listdir('data'):
@@ -192,21 +191,18 @@ for vol in os.listdir('data'):
 	# Array for the prior scenes
 	#   "train_n - 1" is to remove the first scene that wont have an associated TimeAwareLSTM time interval
 	x_scenes_train = ma.zeros([train_n - 1, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2]])
-	x_scenes_valid = ma.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2]])
 	x_scenes_test = ma.zeros([out_n, num_input_scenes, volcano_scenes.shape[1], volcano_scenes.shape[2]])
 	# Array for the time differences between scenes
 	time_differences_train = np.ones(x_scenes_train.shape)
-	time_differences_valid = np.ones(x_scenes_valid.shape)
 	time_differences_test = np.ones(x_scenes_test.shape)
 	# Array for the target scenes
 	y_scenes_train = ma.zeros([train_n - 1, 1, volcano_scenes.shape[1], volcano_scenes.shape[2]])
-	y_scenes_valid = ma.zeros([out_n, 1, volcano_scenes.shape[1], volcano_scenes.shape[2]])
 	y_scenes_test = ma.zeros([out_n, 1, volcano_scenes.shape[1], volcano_scenes.shape[2]])
 	# Formatting the string dates as datetime objects
 	formatted_dates = [datetime.strptime(date, '%Y-%m-%d') for date in tabular_metadata['dates']]
 	# For all observations - acknowledging that the first (n-1) wont have n prior observations
 	#     Also, the first data point wont have a TimeAwareLSTM time value, so it is omitted
-	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_valid.shape[0] + x_scenes_test.shape[0] + num_input_scenes+1):
+	for i in range(num_input_scenes + 1, x_scenes_train.shape[0] + x_scenes_test.shape[0] + num_input_scenes+1):
 		if i < (train_n + num_input_scenes):
 			# Store the image data
 			x_scenes_train[i - num_input_scenes - 1, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
@@ -224,23 +220,6 @@ for vol in os.listdir('data'):
 				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
 				for j in range(len(dates_i)):
 					time_differences_train[i - num_input_scenes - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
-		elif i < (train_n + out_n + num_input_scenes):
-			# Store the image data
-			x_scenes_valid[i - train_n - num_input_scenes, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
-			y_scenes_valid[i - train_n - num_input_scenes, 0, :, :] = volcano_scenes[i, :, :]
-			# Compute the time differences and store
-			# Time LSTM uses forward-time interval
-			if model_selection in ['TimeLSTM', 'ConvTimeLSTM']:
-				dates_i_plus_1 = formatted_dates[(i - num_input_scenes + 1):(i + 1)]
-				dates_i = formatted_dates[(i - num_input_scenes):i]
-				for j in range(len(dates_i_plus_1)):
-					time_differences_valid[i - num_input_scenes - train_n - 1, j] = (dates_i_plus_1[j] - dates_i[j]).days
-			# While TimeAwareLSTM uses backwards-time interval
-			else:
-				dates_i = formatted_dates[(i - num_input_scenes):i]
-				dates_i_minus_1 = formatted_dates[(i - num_input_scenes - 1):(i - 1)]
-				for j in range(len(dates_i)):
-					time_differences_valid[i - num_input_scenes - train_n - 1, j] = (dates_i[j] - dates_i_minus_1[j]).days
 		else:
 			# Store the image data
 			x_scenes_test[i - train_n - out_n - num_input_scenes, :, :, :] = volcano_scenes[(i - num_input_scenes):i, :, :]
@@ -262,9 +241,6 @@ for vol in os.listdir('data'):
 		x_train = x_scenes_train
 		t_train = time_differences_train
 		y_train = y_scenes_train
-		x_valid = x_scenes_valid
-		t_valid = time_differences_valid
-		y_valid = y_scenes_valid
 		x_test = x_scenes_test
 		t_test = time_differences_test
 		y_test = y_scenes_test
@@ -272,19 +248,14 @@ for vol in os.listdir('data'):
 		x_train = ma.append(x_train, x_scenes_train, axis = 0)
 		t_train = np.append(t_train, time_differences_train, axis = 0)
 		y_train = ma.append(y_train, y_scenes_train, axis = 0)
-		x_valid = ma.append(x_valid, x_scenes_valid, axis = 0)
-		t_valid = np.append(t_valid, time_differences_valid, axis = 0)
-		y_valid = ma.append(y_valid, y_scenes_valid, axis = 0)
 		x_test = ma.append(x_test, x_scenes_test, axis = 0)
 		t_test = np.append(t_test, time_differences_test, axis = 0)
 		y_test = ma.append(y_test, y_scenes_test, axis = 0)
 	count += 1
 	vol_cutoff_indices.append(y_train.shape[0])
-	vol_cutoff_indices_valid.append(y_valid.shape[0])
 	vol_cutoff_indices_test.append(y_test.shape[0])
 	vol_name_ls.append(vol)
 	print('\timported ' + str(x_scenes_train.shape[0]) + ' training scenes from ' + vol)
-	print('\t\timported ' + str(x_scenes_valid.shape[0]) + ' validation scenes from ' + vol)
 	print('\t\timported ' + str(x_scenes_test.shape[0]) + ' test scenes from ' + vol)
 
 
@@ -315,30 +286,6 @@ for i in range(len(x_train)):
 			else:
 				x_train[i, j, :, :][ma.mask == True] = x_train[i, j-1, :, :][ma.mask == True]
 				t_train[i, j, :, :][ma.mask == True] = t_train[i, j, :, :][ma.mask == True] + t_train[i, j-1, :, :][ma.mask == True]
-for i in range(len(x_valid)):
-	for j in range(x_valid.shape[1]):
-		# Identifying missing values
-		ma = np.ma.masked_invalid(x_valid[i, j, :, :])
-		# If the mask found NA values
-		if not np.all(ma.mask == False):
-			# Using previous value to fill
-			if j == 0:
-				# Unless there's no previous, then nearest neighbor interpolate
-				if i == 0 or i in vol_cutoff_indices_valid:
-					scene = x_valid[i, j, :, :]
-					# Explicitly retrieving good and bad locations from the mask
-					# note that these differ from (x, y) which earlier defined bad pixel locations
-					X, Y = np.mgrid[0:scene.shape[0], 0:scene.shape[1]]
-					xygood = np.array((X[~scene.mask], Y[~scene.mask])).T
-					xybad = np.array((X[scene.mask], Y[scene.mask])).T
-					# Performing the nearest neighbor gap-filling
-					x_valid[i, j, :, :][ma.mask == True] = scene[~scene.mask][KDTree(xygood).query(xybad)[1]]
-				else:
-					x_valid[i, j, :, :][ma.mask == True] = x_valid[i-1, j, :, :][ma.mask == True]
-					t_valid[i, j, :, :][ma.mask == True] = t_valid[i, j, :, :][ma.mask == True] + t_valid[i-1, j, :, :][ma.mask == True]
-			else:
-				x_valid[i, j, :, :][ma.mask == True] = x_valid[i, j-1, :, :][ma.mask == True]
-				t_valid[i, j, :, :][ma.mask == True] = t_valid[i, j, :, :][ma.mask == True] + t_valid[i, j-1, :, :][ma.mask == True]
 for i in range(len(x_test)):
 	for j in range(x_test.shape[1]):
 		# Identifying missing values
@@ -371,14 +318,6 @@ for i in range(len(y_train)):
 			y_train[i, :, :][ma.mask == True] = x_train[i, [-1], :, :][ma.mask == True]
 		else:
 			y_train[i, :, :][ma.mask == True] = y_train[i-1, :, :, :][ma.mask == True]
-for i in range(len(y_valid)):
-	ma = np.ma.masked_invalid(y_valid[i, :, :, :])
-	# If the mask found NA values
-	if not np.all(ma.mask == False):
-		if i == 0 or i in vol_cutoff_indices_valid:
-			y_valid[i, :, :, :][ma.mask == True] = x_valid[i, [-1], :, :][ma.mask == True]
-		else:
-			y_valid[i, :, :, :][ma.mask == True] = y_valid[i-1, :, :, :][ma.mask == True]
 for i in range(len(y_test)):
 	ma = np.ma.masked_invalid(y_test[i, :, :, :])
 	# If the mask found NA values
@@ -393,13 +332,10 @@ for i in range(len(y_test)):
 # Also attempts to find NAs and replace with 0s, but those shouldnt exist anymore
 stored_parameters = np.zeros([2, 3])
 x_train, stored_parameters = scale_and_remove_na(x_train, stored_parameters, 0)
-x_valid = (x_valid - stored_parameters[0, 0]) / (stored_parameters[1, 0] - stored_parameters[0, 0])
 x_test = (x_test - stored_parameters[0, 0]) / (stored_parameters[1, 0] - stored_parameters[0, 0])
 t_train, stored_parameters = scale_and_remove_na(t_train, stored_parameters, 1)
-t_valid = (t_valid - stored_parameters[0, 1]) / (stored_parameters[1, 1] - stored_parameters[0, 1])
 t_test = (t_test - stored_parameters[0, 1]) / (stored_parameters[1, 1] - stored_parameters[0, 1])
 y_train, stored_parameters = scale_and_remove_na(y_train, stored_parameters, 2)
-y_valid = (y_valid - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
 y_test = (y_test - stored_parameters[0, 2]) / (stored_parameters[1, 2] - stored_parameters[0, 2])
 np.save("outputs/transformation_parameters.npy", stored_parameters)
 
@@ -407,13 +343,10 @@ np.save("outputs/transformation_parameters.npy", stored_parameters)
 # Convert to torch tensors
 x_train = torch.from_numpy(x_train).type(torch.FloatTensor)
 x_test = torch.from_numpy(x_test).type(torch.FloatTensor)
-x_valid = torch.from_numpy(x_valid).type(torch.FloatTensor)
 t_train = torch.from_numpy(t_train).type(torch.FloatTensor)
 t_test = torch.from_numpy(t_test).type(torch.FloatTensor)
-t_valid = torch.from_numpy(t_valid).type(torch.FloatTensor)
 y_train = torch.from_numpy(y_train).type(torch.FloatTensor)
 y_test = torch.from_numpy(y_test).type(torch.FloatTensor)
-y_valid = torch.from_numpy(y_valid).type(torch.FloatTensor)
 
 
 # Defining model parameters
@@ -447,10 +380,8 @@ else:
 		index_min = vol_cutoff_indices[vol_ID - 1]
 	curr_data_indices = range(index_min, index_max)
 	training_set = efficient_Dataset(data_indices=curr_data_indices, x = x_train, t=t_train, y = y_train)
-validation_set = efficient_Dataset(data_indices=range(y_valid.shape[0]), x = x_valid, t = t_valid, y = y_valid)
 test_set = efficient_Dataset(data_indices=range(y_test.shape[0]), x = x_test, t = t_test, y = y_test)
 train_loader = torch.utils.data.DataLoader(dataset = training_set, batch_size = batch_size, shuffle = True)
-validation_loader = torch.utils.data.DataLoader(dataset = validation_set, batch_size = batch_size, shuffle = True)
 test_loader = torch.utils.data.DataLoader(dataset = test_set, batch_size = batch_size, shuffle = True)
 
 
